@@ -1,0 +1,189 @@
+---
+title: Configuration
+description: Customize AntCoder behavior, models, and paths
+---
+
+# Configuration
+
+## Config File Locations
+
+| Platform | Path |
+|----------|------|
+| Linux | `~/.config/antcoder/antcoder.json` |
+| macOS | `~/Library/Application Support/antcoder/antcoder.json` |
+| Windows | `%APPDATA%\antcoder\antcoder.json` |
+
+## Default Configuration
+
+```json
+{
+  "$schema": "https://antcoder.ai/config.json",
+  "model": "local-llama/qwen2.5-coder-3b",
+  "provider": {
+    "local-llama": {
+      "name": "Local Llama",
+      "models": {
+        "qwen2.5-coder-3b": {
+          "name": "Qwen2.5-Coder-3B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 8192
+          }
+        },
+        "qwen2.5-coder-1.5b": {
+          "name": "Qwen2.5-Coder-1.5B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 8192
+          }
+        },
+        "qwen2.5-coder-0.5b": {
+          "name": "Qwen2.5-Coder-0.5B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": false,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 4096
+          }
+        }
+      }
+    }
+  },
+  "llamaServer": {
+    "port": 8080,
+    "contextSize": 4096,
+    "gpuLayers": 99,
+    "sleepIdleSeconds": 300,
+    "modelsDir": "~/.config/antcoder/models"
+  },
+  "agent": {
+    "leaderModel": "local-llama/qwen2.5-coder-3b",
+    "workerModels": {
+      "coder": "local-llama/qwen2.5-coder-3b",
+      "explorer": "local-llama/qwen2.5-coder-1.5b",
+      "planner": "local-llama/qwen2.5-coder-3b"
+    },
+    "maxSubagents": 5,
+    "maxDepth": 3
+  },
+  "theme": "catppuccin-macchiato",
+  "keybindings": "default"
+}
+```
+
+## Key Settings
+
+### Model Selection
+
+```json
+{
+  "model": "local-llama/qwen2.5-coder-1.5b"
+}
+```
+
+Available models: `qwen2.5-coder-3b`, `qwen2.5-coder-1.5b`, `qwen2.5-coder-0.5b`
+
+### llama.cpp Server
+
+```json
+{
+  "llamaServer": {
+    "port": 8080,              // Server port
+    "contextSize": 4096,       // Context window (max 32768)
+    "gpuLayers": 99,           // -1=auto, 0=CPU only, 99=all GPU
+    "sleepIdleSeconds": 300,   // Unload model after idle (0=never)
+    "modelsDir": "~/.config/antcoder/models"
+  }
+}
+```
+
+### Agent Configuration
+
+```json
+{
+  "agent": {
+    "leaderModel": "local-llama/qwen2.5-coder-3b",
+    "workerModels": {
+      "coder": "local-llama/qwen2.5-coder-3b",
+      "explorer": "local-llama/qwen2.5-coder-1.5b",
+      "planner": "local-llama/qwen2.5-coder-3b"
+    },
+    "maxSubagents": 5,      // Parallel workers
+    "maxDepth": 3           // Subagent nesting limit
+  }
+}
+```
+
+### Theme & Keybindings
+
+```json
+{
+  "theme": "catppuccin-macchiato",
+  "keybindings": "default"
+}
+```
+
+**Themes:** `catppuccin-macchiato`, `catppuccin-frappe`, `dracula`, `nord`, `tokyonight`, `github-dark`, `one-dark`
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ANTODER_CONFIG` | Custom config file path | Auto-detect |
+| `ANTODER_MODELS_DIR` | Models directory | `~/.config/antcoder/models` |
+| `ANTODER_PORT` | llama-server port | `8080` |
+| `ANTODER_LOG_LEVEL` | Log level | `info` |
+
+## CLI Flags
+
+```bash
+antcoder --help
+# --config <path>        Custom config file
+# --model <id>           Override model
+# --port <num>           Server port
+# --gpu-layers <num>     GPU layers (-1=auto)
+# --context-size <num>   Context window
+# --no-auto-download     Skip model download
+# --theme <name>         UI theme
+# --debug                Debug logging
+```
+
+## Adding Custom Models
+
+```json
+{
+  "provider": {
+    "local-llama": {
+      "models": {
+        "my-custom-model": {
+          "name": "My Custom Model",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 8192
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Then download:
+```bash
+antcoder model download my-custom-model
+# Or place GGUF in modelsDir manually
+```

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "AntCoder",
+  "logo": {
+    "light": "/logo/antcoder-light.svg",
+    "dark": "/logo/antcoder-dark.svg"
+  },
+  "favicon": "/favicon.ico",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#00C896",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#00C896"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/Shahriar-Antu/AntCoder"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "/getting-started"
+  },
+  "tabs": [
+    {
+      "name": "CLI",
+      "url": "/cli/overview"
+    },
+    {
+      "name": "Desktop",
+      "url": "/desktop/overview"
+    },
+    {
+      "name": "API Reference",
+      "url": "/api-reference/introduction"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Documentation",
+      "icon": "book-open",
+      "url": "/introduction"
+    },
+    {
+      "name": "API Reference",
+      "icon": "code",
+      "url": "/api-reference/introduction"
+    },
+    {
+      "name": "Community",
+      "icon": "message-square",
+      "url": "https://github.com/Shahriar-Antu/AntCoder/discussions"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "getting-started",
+        "installation",
+        "quickstart",
+        "configuration"
+      ]
+    },
+    {
+      "group": "Concepts",
+      "pages": [
+        "concepts/local-llm",
+        "concepts/leader-workers",
+        "concepts/models",
+        "concepts/privacy"
+      ]
+    },
+    {
+      "group": "CLI Reference",
+      "pages": [
+        "cli/overview",
+        "cli/commands",
+        "cli/options",
+        "cli/config",
+        "cli/models"
+      ]
+    },
+    {
+      "group": "Desktop App",
+      "pages": [
+        "desktop/overview",
+        "desktop/installation",
+        "desktop/features",
+        "desktop/shortcuts"
+      ]
+    },
+    {
+      "group": "Development",
+      "pages": [
+        "development/architecture",
+        "development/contributing",
+        "development/testing",
+        "development/release"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/provider",
+        "api-reference/llama-server",
+        "api-reference/models"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/Shahriar-Antu/AntCoder",
+    "twitter": "https://twitter.com/shahriar_antu"
+  }
+}

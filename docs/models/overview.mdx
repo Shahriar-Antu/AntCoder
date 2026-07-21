@@ -1,0 +1,137 @@
+---
+title: Models
+description: Available models and how to add custom ones
+---
+
+# Models
+
+## Default Models
+
+| Model | Size | RAM | Context | Best For |
+|-------|------|-----|---------|----------|
+| **Qwen2.5-Coder-3B** | 1.85 GB | 3 GB | 32K | **Default** — General coding |
+| Qwen2.5-Coder-1.5B | 1.0 GB | 2 GB | 32K | Fast completion, edge devices |
+| Qwen2.5-Coder-0.5B | 0.4 GB | 1 GB | 32K | Minimal hardware |
+
+All models are **Apache 2.0** licensed.
+
+## Switching Models
+
+```bash
+# CLI command
+:model qwen2.5-coder-1.5b
+
+# Config
+{
+  "model": "local-llama/qwen2.5-coder-1.5b"
+}
+
+# Environment
+ANTODER_MODEL=local-llama/qwen2.5-coder-1.5b antcoder
+```
+
+## Downloading Models
+
+```bash
+# Auto-download on first run (default)
+antcoder
+
+# Manual download
+antcoder model download qwen2.5-coder-3b
+antcoder model download qwen2.5-coder-1.5b
+
+# List available
+antcoder model list
+```
+
+## Custom Models
+
+Add any GGUF model from HuggingFace:
+
+```json
+{
+  "provider": {
+    "local-llama": {
+      "models": {
+        "deepseek-coder-6.7b": {
+          "name": "DeepSeek Coder 6.7B",
+          "toolcall": true,
+          "context": { "limit": 16384 }
+        },
+        "starcoder2-3b": {
+          "name": "StarCoder2 3B",
+          "toolcall": true,
+          "context": { "limit": 16384 }
+        }
+      }
+    }
+  }
+}
+```
+
+Then download:
+
+```bash
+antcoder model download deepseek-coder-6.7b
+```
+
+## Recommended Models
+
+| Model | Size | License | Notes |
+|-------|------|---------|-------|
+| **Qwen2.5-Coder-3B** | 1.85 GB | Apache 2.0 | Best balance |
+| **Qwen2.5-Coder-7B** | 4.2 GB | Apache 2.0 | Higher quality |
+| **DeepSeek-Coder-6.7B** | 4.2 GB | Apache 2.0 | Strong coding |
+| **StarCoder2-3B** | 1.6 GB | Apache 2.0 | Multi-language |
+| **CodeLlama-7B** | 4.2 GB | Llama 2 | Meta's model |
+| **Phi-3.5-mini** | 2.3 GB | MIT | Microsoft, fast |
+
+## Quantization Guide
+
+| Suffix | Bits | Quality | Speed | Use Case |
+|--------|------|---------|-------|----------|
+| Q4_K_M | 4-bit | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | **Recommended** |
+| Q5_K_M | 5-bit | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Higher quality |
+| Q8_0 | 8-bit | ⭐⭐⭐⭐⭐ | ⭐⭐ | Near FP16 |
+| Q2_K | 2-bit | ⭐⭐ | ⭐⭐⭐⭐⭐ | Extreme compression |
+
+## Model Requirements by Task
+
+| Task | Min Model | Recommended |
+|------|-----------|-------------|
+| Code Completion | 0.5B | 1.5B |
+| Bug Fixing | 1.5B | 3B |
+| Refactoring | 3B | 7B |
+| Architecture Design | 3B | 7B |
+| Test Generation | 1.5B | 3B |
+| Documentation | 1.5B | 3B |
+
+## Hardware Recommendations
+
+| Hardware | Recommended Model |
+|----------|-------------------|
+| 8GB RAM, No GPU | Qwen2.5-Coder-1.5B (Q4) |
+| 16GB RAM, No GPU | Qwen2.5-Coder-3B (Q4) |
+| 16GB RAM + 8GB VRAM | Qwen2.5-Coder-7B (Q4) |
+| 32GB RAM + 12GB VRAM | Qwen2.5-Coder-7B (Q5) / DeepSeek 6.7B |
+| MacBook M2/M3 16GB | Qwen2.5-Coder-3B (Metal) |
+| MacBook M2/M3 32GB | Qwen2.5-Coder-7B (Metal) |
+
+## Model Storage
+
+```
+~/.config/antcoder/models/
+├── qwen2.5-coder-3b-instruct-q4_k_m.gguf
+├── qwen2.5-coder-1.5b-instruct-q4_k_m.gguf
+└── qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
+```
+
+Change location:
+
+```json
+{
+  "llamaServer": {
+    "modelsDir": "/custom/path/models"
+  }
+}
+```

@@ -1,0 +1,63 @@
+---
+title: Quickstart
+description: Get AntCoder running in 2 minutes
+---
+
+# Quickstart
+
+## Prerequisites
+
+- **Bun** ≥ 1.3.11 — `curl -fsSL https://bun.sh/install | bash`
+- **llama.cpp** server binary in PATH (or bundled)
+- **RAM**: 4GB+ for 3B model, 2GB+ for 1.5B model
+
+## Install & Run
+
+```bash
+# Clone and install
+git clone https://github.com/Shahriar-Antu/AntCoder
+cd AntCoder
+bun install
+
+# Run (downloads model on first run ~1.85GB)
+bun run --cwd packages/opencode dev
+```
+
+## First Run
+
+On first run, AntCoder will:
+
+1. **Download model** — Qwen2.5-Coder-3B-Q4_K_M (~1.85GB) from HuggingFace
+2. **Start llama-server** — Local OpenAI-compatible API on `localhost:8080`
+3. **Launch TUI** — Terminal UI with agent workspace
+
+```bash
+# First run output:
+🔍 Checking for model: qwen2.5-coder-3b
+📥 Downloading from HuggingFace...
+████████████████████ 1.85GB/1.85GB
+✅ Model ready
+🚀 Starting llama-server on port 8080...
+✅ Server healthy
+🐜 AntCoder ready!
+```
+
+## Basic Usage
+
+```bash
+# In AntCoder TUI, press ':' for commands
+:help                    # Show all commands
+:model qwen2.5-coder-1.5b  # Switch to smaller model
+:model qwen2.5-coder-3b    # Switch back to default
+
+# Or chat directly
+> Write a fizzbuzz in Python
+> Refactor this function to use async/await
+> Explain this codebase
+```
+
+## Next
+
+- [Installation](/installation) — Detailed setup for all platforms
+- [Configuration](/configuration) — Customize models, paths, behavior
+- [CLI Commands](/cli/commands) — Full command reference

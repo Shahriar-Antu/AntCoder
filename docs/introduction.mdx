@@ -1,0 +1,53 @@
+---
+title: Introduction
+description: Local-only AI coding agent with llama.cpp backend
+---
+
+# Welcome to AntCoder
+
+**AntCoder** is a local-first AI coding agent that runs entirely on your machine. No API keys, no cloud dependencies, no data leaves your computer.
+
+## Why AntCoder?
+
+| Feature | Description |
+|---------|-------------|
+| 🔒 **100% Local** | Runs on your hardware, zero cloud calls |
+| 🐜 **Leader + Workers** | Parallel subagents for complex tasks |
+| 🦙 **llama.cpp Backend** | Fast inference with Metal/CUDA/Vulkan |
+| 📦 **Auto Model Download** | Downloads GGUF models from HuggingFace |
+| 🖥️ **Multi-Platform** | CLI, Desktop (Tauri), Web UI |
+| 📜 **MIT Licensed** | Fork, modify, extend freely |
+
+## Quick Comparison
+
+| | AntCoder | Claude Code | Cursor | GitHub Copilot |
+|---|---|---|---|---|
+| **Local Only** | ✅ | ❌ | ❌ | ❌ |
+| **No API Key** | ✅ | ❌ | ❌ | ❌ |
+| **Parallel Agents** | ✅ | ✅ | ✅ | ❌ |
+| **Open Source** | ✅ (MIT) | ❌ | ❌ | ❌ |
+| **Offline Work** | ✅ | ❌ | ❌ | ❌ |
+
+## Architecture
+
+```
+┌─────────────────────────────────────┐
+│           AntCoder CLI              │
+├─────────────────────────────────────┤
+│  Leader Agent (orchestrates)        │
+│  ├─ Worker: Coder (writes code)     │
+│  ├─ Worker: Explorer (reads/search) │
+│  └─ Worker: Planner (creates plans) │
+├─────────────────────────────────────┤
+│  Local LLM Provider (OpenAI compat) │
+├─────────────────────────────────────┤
+│  llama-server (child process)       │
+│  └─ GGUF Model (on disk)            │
+└─────────────────────────────────────┘
+```
+
+## Next Steps
+
+- [Quickstart](/quickstart) — Get running in 2 minutes
+- [Installation](/installation) — Detailed install guide
+- [Configuration](/configuration) — Customize models, paths, behavior
