@@ -5,6 +5,7 @@ packages/opencode/bin/.opencode
 .worktrees
 .sst
 .env
+.env.local
 .idea
 .vscode
 .codex
@@ -20,6 +21,7 @@ ts-dist
 refs
 Session.vim
 /opencode.json
+/antcoder.json
 a.out
 target
 .scripts
@@ -43,3 +45,9 @@ packages/opencode/src/provider/models-snapshot.js
 /product-intro/renders
 /product-intro/.hyperframes
 /product-intro/.thumbnails
+
+# AntCoder local models (large files)
+packages/opencode/models/
+*.gguf
+*.gguf.*
+/home/*/.config/antcoder/models/
