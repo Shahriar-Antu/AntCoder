@@ -23,7 +23,7 @@ if (!platform || !arch) {
 
 const ext = platform === "windows" ? ".exe" : ""
 const asset = `antcoder-${platform}-${arch}${ext}`
-const dest = path.join(__dirname, ".opencode")
+const dest = path.join(__dirname, ".antcoder")
 
 function fetch(url, redirects) {
   if (redirects > 10) {

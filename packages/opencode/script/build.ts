@@ -232,7 +232,7 @@ for (const item of targets) {
 
   // Smoke test: only run if binary is for current platform
   if (item.os === process.platform && item.arch === process.arch && !item.abi) {
-    const binaryPath = `dist/${name}/bin/opencode`
+    const binaryPath = `dist/${name}/bin/antcoder`
     console.log(`Running smoke test: ${binaryPath} --version`)
     try {
       const versionOutput = await $`${binaryPath} --version`.text()
@@ -263,7 +263,7 @@ if (Script.release) {
   const assets: string[] = []
   for (const key of Object.keys(binaries)) {
     const isWin = key.includes("windows")
-    const src = `dist/${key}/bin/opencode${isWin ? ".exe" : ""}`
+    const src = `dist/${key}/bin/antcoder${isWin ? ".exe" : ""}`
     const dest = `dist/${key}${isWin ? ".exe" : ""}`
     await $`cp ${src} ${dest}`
     assets.push(dest)
