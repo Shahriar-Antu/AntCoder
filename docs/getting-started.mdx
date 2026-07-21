@@ -1,0 +1,73 @@
+---
+title: Getting Started
+description: Get AntCoder running in minutes
+---
+
+# Getting Started
+
+## Prerequisites
+
+- **Bun** ≥ 1.3.11 — `curl -fsSL https://bun.sh/install | bash`
+- **4GB+ RAM** for default model (Qwen2.5-Coder-3B)
+- **Internet** for first-run model download (~1.85GB)
+
+## Quick Install
+
+```bash
+# 1. Clone
+git clone https://github.com/Shahriar-Antu/AntCoder
+cd AntCoder
+
+# 2. Install dependencies
+bun install
+
+# 3. Run (downloads model on first run)
+bun run --cwd packages/opencode dev
+```
+
+## What Happens on First Run
+
+```
+🔍 Checking for model: qwen2.5-coder-3b
+📥 Downloading from HuggingFace...
+████████████████████ 1.85GB/1.85GB
+✅ Model ready
+🚀 Starting llama-server on port 8080...
+✅ Server healthy
+🐜 AntCoder ready!
+```
+
+## Verify Installation
+
+```bash
+# Check version
+antcoder --version
+
+# Health check
+antcoder doctor
+
+# Expected output:
+# ✅ Bun: 1.3.11
+# ✅ llama-server: available
+# ✅ Model: qwen2.5-coder-3b (downloaded)
+# ✅ Config: ~/.config/antcoder/antcoder.json
+```
+
+## Basic Usage
+
+```bash
+# Start interactive TUI
+antcoder
+
+# Run single command
+antcoder "write a fizzbuzz in Python"
+
+# Use specific model
+antcoder --model qwen2.5-coder-1.5b "refactor this code"
+```
+
+## Next Steps
+
+- [Configuration](/configuration) — Customize models, paths, behavior
+- [CLI Commands](/cli/commands) — Full command reference
+- [Models](/models/overview) — Available models and hardware requirements

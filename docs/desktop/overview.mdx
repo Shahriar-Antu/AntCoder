@@ -1,0 +1,116 @@
+---
+title: Desktop App
+description: AntCoder Desktop (Tauri) installation and features
+---
+
+# Desktop App
+
+## Overview
+
+The AntCoder Desktop app provides a native window with the same TUI experience, plus native menus, notifications, and system integration.
+
+## Installation
+
+### Download
+
+| Platform | File |
+|----------|------|
+| Linux (x64) | `AntCoder_0.1.0_amd64.AppImage` |
+| Linux (ARM64) | `AntCoder_0.1.0_arm64.AppImage` |
+| macOS (Intel) | `AntCoder_0.1.0_x64.dmg` |
+| macOS (Apple Silicon) | `AntCoder_0.1.0_arm64.dmg` |
+| Windows | `AntCoder_0.1.0_x64-setup.exe` |
+
+### Install
+
+```bash
+# Linux AppImage
+chmod +x AntCoder-*.AppImage
+./AntCoder-*.AppImage
+
+# macOS
+open AntCoder-*.dmg
+# Drag to Applications
+
+# Windows
+AntCoder-*-setup.exe
+```
+
+### From Source
+
+```bash
+# Requires: Rust, Node.js, Tauri CLI
+cd packages/desktop
+bun install
+bun tauri build
+```
+
+## Features
+
+| Feature | CLI | Desktop |
+|---------|-----|---------|
+| TUI Interface | ✅ | ✅ |
+| Native Menus | ❌ | ✅ |
+| System Notifications | ❌ | ✅ |
+| Window Management | ❌ | ✅ |
+| Auto-updates | ❌ | ✅ |
+| Tray Icon | ❌ | ✅ |
+| Global Shortcut | ❌ | ✅ (Ctrl+Shift+A) |
+
+## Configuration
+
+Desktop app uses same config as CLI: `antcoder.json`
+
+Additional desktop settings:
+
+```json
+{
+  "desktop": {
+    "startMinimized": false,
+    "showTray": true,
+    "globalShortcut": "Ctrl+Shift+A",
+    "notifications": true,
+    "autoUpdate": true
+  }
+}
+```
+
+## Tray Icon
+
+- **Left click**: Show/hide window
+- **Right click**: Context menu (New Session, Settings, Quit)
+- **Notification**: Task complete, errors
+
+## Global Shortcut
+
+Default: `Ctrl+Shift+A` (configurable)
+
+Opens AntCoder from anywhere, creates new session.
+
+## Auto-Updates
+
+- Checks on startup
+- Downloads in background
+- Prompts to restart
+- Falls back to manual download
+
+## Troubleshooting
+
+**App won't start:**
+```bash
+# Linux: Check FUSE
+sudo apt install libfuse2
+
+# macOS: Allow in Security & Privacy
+# Windows: Run as admin once
+```
+
+**Tray icon missing:**
+```bash
+# Linux: Install libappindicator
+sudo apt install libappindicator3-1
+```
+
+**Shortcut not working:**
+- Check Settings > Keyboard Shortcuts
+- Ensure no conflict with other apps

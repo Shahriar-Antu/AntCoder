@@ -1,0 +1,98 @@
+---
+title: Privacy & Security
+description: How AntCoder protects your data
+---
+
+# Privacy & Security
+
+## Zero Data Collection
+
+AntCoder is **local-first by design**:
+
+| Data Type | Sent to Cloud? | Stored Locally? |
+|-----------|----------------|-----------------|
+| Source code | ❌ Never | ✅ Yes (your files) |
+| Chat history | ❌ Never | ✅ Yes (SQLite) |
+| Model weights | ❌ Never | ✅ Yes (GGUF files) |
+| Telemetry | ❌ None | ❌ None |
+| Usage analytics | ❌ None | ❌ None |
+
+## Architecture
+
+```
+Your Machine
+├── AntCoder Process
+│   ├── Your code (never leaves)
+│   ├── Session history (SQLite, local)
+│   └── Config (JSON, local)
+├── llama-server (child process)
+│   ├── GGUF model (downloaded once)
+│   └── KV cache (RAM, cleared on unload)
+└── Network
+    ├── localhost:8080 only (llama-server API)
+    └── HuggingFace (model download, once)
+```
+
+## No Telemetry
+
+```json
+// No telemetry config exists
+// No anonymous usage reporting
+// No error reporting to external servers
+// No crash dumps sent anywhere
+```
+
+## Model Downloads
+
+- **Source:** HuggingFace (direct download)
+- **Frequency:** Once per model (cached forever)
+- **Verification:** File size check (>100MB)
+- **No auth required** for public models
+
+## Network Access
+
+```bash
+# Only outbound connection:
+curl https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF/...
+
+# No connections to:
+# - antcoder.ai
+# - github.com (after clone)
+# - analytics services
+# - update servers (manual check only)
+```
+
+## Data Retention
+
+| Data | Location | Retention |
+|------|----------|-----------|
+| Model files | `~/.config/antcoder/models/` | Until deleted |
+| Session history | `~/.local/share/antcoder/*.db` | Until deleted |
+| Config | `~/.config/antcoder/antcoder.json` | Until changed |
+| Logs | `~/.local/share/antcoder/log/` | Rotating (7 days) |
+
+## Delete All Data
+
+```bash
+# Remove everything
+rm -rf ~/.config/antcoder
+rm -rf ~/.local/share/antcoder
+```
+
+## Security Features
+
+- **No sudo required** — Runs as user
+- **No background daemons** — Starts/stops with CLI
+- **Port 8080 localhost only** — No external binding
+- **SQLite WAL mode** — Atomic writes, no corruption
+- **Model signature verify** — Optional SHA256 check
+
+## Comparison
+
+| Feature | AntCoder | Claude Code | Cursor | Copilot |
+|---------|----------|-------------|--------|---------|
+| Code leaves machine | ❌ | ✅ | ✅ | ✅ |
+| Requires account | ❌ | ✅ | ✅ | ✅ |
+| Telemetry | ❌ | ✅ | ✅ | ✅ |
+| Works offline | ✅ | ❌ | ❌ | ❌ |
+| Audit source | ✅ | ❌ | ❌ | ❌ |

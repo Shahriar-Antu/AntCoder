@@ -1,0 +1,89 @@
+---
+title: Desktop Features
+description: AntCoder Desktop app features
+---
+
+# Desktop Features
+
+## Native Experience
+
+| Feature | Description |
+|---------|-------------|
+| **Native Window** | Frameless, custom titlebar |
+| **Tray Icon** | Minimize to tray, quick actions |
+| **Notifications** | Task complete, errors, updates |
+| **Auto-Updates** | Background download, prompt to restart |
+| **Global Shortcut** | `Ctrl+Shift+A` to open from anywhere |
+| **Window State** | Remembers size, position, maximized |
+
+## Menu Bar
+
+```
+File          Edit          View          Window          Help
+├─ New Session  ├─ Copy       ├─ Theme       ├─ Minimize     ├─ Documentation
+├─ Open Config  ├─ Paste      ├─ Zoom In     ├─ Close        ├─ Report Issue
+├─ Settings     ├─ Select All ├─ Zoom Out    ├─ Fullscreen   ├─ Check Updates
+├─ ──────────   ├─ Find       ├─ Reset Zoom  └─ ──────────   ├─ About
+└─ Quit         └─ ────────── └─ Toggle DevTools
+```
+
+## Settings Panel
+
+Access via `File > Settings` or `Cmd+,`
+
+### General
+
+- **Start on login** — Launch at system startup
+- **Minimize to tray** — Close button hides to tray
+- **Auto-update** — Check for updates automatically
+- **Language** — UI language (English, more coming)
+
+### Appearance
+
+- **Theme** — Catppuccin, Dracula, Nord, Tokyo Night, etc.
+- **Font** — JetBrains Mono, Fira Code, Cascadia, etc.
+- **Font Size** — 10-24px
+- **Line Height** — 1.2-2.0
+
+### Shortcuts
+
+| Action | Default | Customizable |
+|--------|---------|--------------|
+| New Session | `Cmd+N` | ✓ |
+| Open Config | `Cmd+,` | ✓ |
+| Toggle Tray | `Cmd+Shift+T` | ✓ |
+| Global Open | `Ctrl+Shift+A` | ✓ |
+| Find | `Cmd+F` | ✓ |
+| Zoom In | `Cmd++` | ✓ |
+| Zoom Out | `Cmd+-` | ✓ |
+
+### Advanced
+
+- **Model Directory** — Custom models path
+- **Log Level** — Debug, Info, Warn, Error
+- **Telemetry** — Disable (default: off)
+- **Experimental** — Enable beta features
+
+## Notifications
+
+- **Task Complete** — "Refactoring complete"
+- **Error** — "Model download failed"
+- **Update Ready** — "AntCoder 0.2.0 ready"
+- **Model Ready** — "Qwen2.5-Coder-3B loaded"
+
+Click notification to open app.
+
+## Tray Menu
+
+Right-click tray icon:
+
+```
+▶ New Session
+▶ Open Window
+──
+▶ Settings
+▶ Check Updates
+▶ Quit
+```
+
+Left-click: Toggle window visibility.

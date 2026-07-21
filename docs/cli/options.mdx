@@ -1,0 +1,101 @@
+---
+title: CLI Options
+description: Command-line flags and options
+---
+
+# CLI Options
+
+## Global Flags
+
+```bash
+antcoder [OPTIONS] [COMMAND]
+```
+
+| Flag | Short | Description | Default |
+|------|-------|-------------|---------|
+| `--config` | `-c` | Custom config file path | Auto-detect |
+| `--model` | `-m` | Override model | Config value |
+| `--port` | `-p` | llama-server port | 8080 |
+| `--gpu-layers` | `-g` | GPU layers (-1=auto, 0=CPU) | 99 |
+| `--context-size` | | Context window tokens | 4096 |
+| `--no-auto-download` | | Skip model download | false |
+| `--theme` | `-t` | UI theme | catppuccin-macchiato |
+| `--debug` | `-d` | Debug logging | false |
+| `--version` | `-v` | Show version | - |
+| `--help` | `-h` | Show help | - |
+
+## Commands
+
+```bash
+antcoder <command> [args]
+```
+
+| Command | Description |
+|---------|-------------|
+| `dev` | Start development TUI |
+| `build` | Build binary |
+| `model <sub>` | Model management |
+| `doctor` | Health check |
+| `config <sub>` | Config management |
+
+## Model Subcommands
+
+```bash
+antcoder model <subcommand>
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `list` | List available models |
+| `download <id>` | Download model |
+| `remove <id>` | Remove downloaded model |
+| `info <id>` | Show model details |
+| `default <id>` | Set default model |
+
+## Config Subcommands
+
+```bash
+antcoder config <subcommand>
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `show` | Display current config |
+| `edit` | Open config in editor |
+| `reset` | Reset to defaults |
+| `path` | Show config file path |
+
+## Examples
+
+```bash
+# Run with specific model
+antcoder --model qwen2.5-coder-1.5b
+
+# Run with CPU only
+antcoder --gpu-layers 0
+
+# Custom config
+antcoder --config ~/my-antcoder.json
+
+# Debug mode
+antcoder --debug
+
+# Health check
+antcoder doctor
+
+# Download model
+antcoder model download deepseek-coder-6.7b
+
+# Set default model
+antcoder model default qwen2.5-coder-3b
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ANTODER_CONFIG` | Config file path | Auto |
+| `ANTODER_MODELS_DIR` | Models directory | Platform default |
+| `ANTODER_PORT` | Server port | 8080 |
+| `ANTODER_LOG_LEVEL` | Log level | info |
+| `ANTODER_NO_TELEMETRY` | Disable telemetry | 1 |

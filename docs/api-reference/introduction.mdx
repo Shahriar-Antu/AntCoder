@@ -1,0 +1,88 @@
+---
+title: API Reference
+description: AntCoder API documentation
+---
+
+# API Reference
+
+## Overview
+
+AntCoder exposes a local OpenAI-compatible API via `llama-server` for integration with other tools.
+
+## Base URL
+
+```
+http://localhost:8080/v1
+```
+
+## Authentication
+
+No authentication required for local use. Optional API key:
+
+```bash
+llama-server --api-key sk-your-key
+```
+
+Then:
+
+```bash
+curl -H "Authorization: Bearer sk-your-key" ...
+```
+
+## Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/props` | GET | Server info |
+| `/v1/models` | GET | List models |
+| `/v1/chat/completions` | POST | Chat completion |
+| `/v1/completions` | POST | Text completion |
+| `/v1/embeddings` | POST | Embeddings |
+| `/infill` | POST | Code infill |
+| `/slots` | GET | Slot status |
+
+## Quick Examples
+
+### Chat
+
+```bash
+curl -X POST http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "local",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": true
+  }'
+```
+
+### With Tools
+
+```bash
+curl -X POST http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "local",
+    "messages": [{"role": "user", "content": "Read file.txt"}],
+    "tools": [{
+      "type": "function",
+      "function": {
+        "name": "read_file",
+        "parameters": {
+          "type": "object",
+          "properties": {"path": {"type": "string"}},
+          "required": ["path"]
+        }
+      }
+    }]
+  }'
+```
+
+## Integration
+
+Works with any OpenAI-compatible client:
+
+- **LangChain**: `ChatOpenAI(base_url="http://localhost:8080/v1")`
+- **LlamaIndex**: `OpenAI(api_base="http://localhost:8080/v1")`
+- **LiteLLM**: `completion(model="local", api_base="http://localhost:8080/v1")`
+- **OpenAI SDK**: `OpenAI(base_url="http://localhost:8080/v1", api_key="not-needed")`

@@ -1,0 +1,105 @@
+---
+title: Provider API
+description: Local LLM provider interface
+---
+
+# Provider API
+
+## Local Llama Provider
+
+The `local-llama` provider uses llama.cpp's `llama-server` for inference.
+
+### Configuration
+
+```json
+{
+  "provider": {
+    "local-llama": {
+      "name": "Local Llama",
+      "models": {
+        "qwen2.5-coder-3b": {
+          "name": "Qwen2.5-Coder-3B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": { "limit": 32768, "limit_output": 8192 }
+        }
+      }
+    }
+  }
+}
+```
+
+### Model Selection
+
+```bash
+# Via config
+"model": "local-llama/qwen2.5-coder-3b"
+
+# Via CLI
+antcoder --model local-llama/qwen2.5-coder-1.5b
+
+# Via command
+:model qwen2.5-coder-3b
+```
+
+### Supported Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `temperature` | number | Sampling temperature (0-2) |
+| `top_p` | number | Nucleus sampling |
+| `max_tokens` | number | Max completion tokens |
+| `stream` | boolean | Enable streaming |
+| `stop` | string[] | Stop sequences |
+| `tools` | object[] | Function definitions |
+| `tool_choice` | string/object | Tool selection |
+
+### Tool Calling
+
+```json
+{
+  "tools": [{
+    "type": "function",
+    "function": {
+      "name": "read_file",
+      "description": "Read a file",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" }
+        },
+        "required": ["path"]
+      }
+    }
+  }],
+  "tool_choice": "auto"
+}
+```
+
+### Error Codes
+
+| Code | Meaning |
+|------|---------|
+| `model_not_found` | Model not downloaded |
+| `server_unavailable` | llama-server not running |
+| `context_overflow` | Input exceeds context window |
+| `tool_call_failed` | Tool execution error |
+
+## Adding Custom Providers
+
+```typescript
+// In provider.ts BUNDLED_PROVIDERS
+"my-provider": createMyProvider,
+
+// Custom loader
+custom(dep) {
+  return {
+    "my-provider": () => Effect.succeed({
+      autoload: true,
+      options: { baseURL: "http://localhost:11434/v1" }
+    })
+  }
+}
+```

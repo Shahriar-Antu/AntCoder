@@ -1,0 +1,129 @@
+---
+title: Testing
+description: Testing guidelines and commands
+---
+
+# Testing
+
+## Test Commands
+
+```bash
+# All tests
+bun --cwd packages/opencode test
+
+# Specific test file
+bun --cwd packages/opencode test test/tool/task.test.ts
+
+# With timeout
+bun --cwd packages/opencode test --timeout 30000
+
+# Watch mode
+bun --cwd packages/opencode test --watch
+
+# CI mode (JUnit output)
+bun --cwd packages/opencode test:ci
+```
+
+## Test Structure
+
+```
+packages/opencode/test/
+├── tool/           # Tool tests
+│   ├── task.test.ts
+│   ├── read.test.ts
+│   └── ...
+├── agent/          # Agent tests
+├── session/        # Session tests
+├── provider/       # Provider tests
+├── orchestration/  # Multi-agent tests
+└── fixture/        # Test helpers
+```
+
+## Writing Tests
+
+```typescript
+// test/tool/mytest.test.ts
+import { test, expect } from "bun:test"
+import { MyTool } from "@/tool/mytool"
+import { createTestContext } from "../fixture/context"
+
+test("MyTool does something", async () => {
+  const ctx = await createTestContext()
+  const tool = new MyTool(ctx)
+
+  const result = await tool.execute({ input: "test" })
+
+  expect(result.success).toBeTrue()
+  expect(result.output).toContain("expected")
+})
+```
+
+## Test Fixtures
+
+```typescript
+// test/fixture/context.ts
+import { TestContext } from "@/test/context"
+import { tmpdir } from "os"
+import { join } from "path"
+
+export async function createTestContext(): Promise<TestContext> {
+  const dir = join(tmpdir(), `antcoder-test-${Date.now()}`)
+  // Setup temp directory, config, etc.
+  return { dir, cleanup: () => rm(dir, { recursive: true }) }
+}
+```
+
+## Running Specific Test Suites
+
+```bash
+# Tool tests only
+bun --cwd packages/opencode test test/tool/
+
+# Agent tests only
+bun --cwd packages/opencode test test/agent/
+
+# Provider tests only
+bun --cwd packages/opencode test test/provider/
+
+# Orchestration (multi-agent)
+bun --cwd packages/opencode test test/orchestration/
+```
+
+## Integration Tests
+
+```bash
+# Full CLI integration
+bun --cwd packages/opencode test test/integration/cli.test.ts
+
+# Provider integration (requires API keys)
+bun --cwd packages/opencode test test/integration/provider.test.ts
+```
+
+## Debugging Tests
+
+```bash
+# Debug with console.log
+bun --cwd packages/opencode test --verbose
+
+# Run single test with debug
+bun --cwd packages/opencode test test/tool/read.test.ts -t "reads file"
+```
+
+## Coverage
+
+```bash
+# Generate coverage report
+bun --cwd packages/opencode test --coverage
+
+# Output: packages/opencode/coverage/
+# Open coverage/index.html in browser
+```
+
+## Best Practices
+
+1. **Test behavior, not implementation**
+2. **Use real implementations** — avoid mocks
+3. **Test fixtures** — isolate with tmpdir
+4. **Descriptive names** — `test("Task tool spawns subagent with correct context")`
+5. **Clean up** — always cleanup temp dirs
+5. **Parallel safe** — no shared global state

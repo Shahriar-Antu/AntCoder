@@ -1,0 +1,118 @@
+---
+title: Contributing
+description: How to contribute to AntCoder
+---
+
+# Contributing
+
+## Development Setup
+
+```bash
+# Fork & clone
+git clone https://github.com/YOUR-USERNAME/AntCoder
+cd AntCoder
+
+# Install
+bun install
+
+# Run dev
+bun run --cwd packages/opencode dev
+```
+
+## Code Style
+
+- **TypeScript** strict mode
+- **Effect-TS** for async/error handling
+- **Bun** APIs preferred (`Bun.file`, `Bun.write`)
+- **Single-word names** default (`pid`, `cfg`, `err`, `opts`)
+- **Early returns** over `else`
+- **No `try/catch`** where avoidable
+
+## Testing
+
+```bash
+# All tests
+bun --cwd packages/opencode test
+
+# Single test
+bun --cwd packages/opencode test test/tool/task.test.ts
+
+# With coverage
+bun --cwd packages/opencode test --coverage
+```
+
+## Commit Messages
+
+```
+type(scope): description
+
+Types: feat, fix, docs, style, refactor, test, chore
+Scope: provider, tool, agent, cli, tui, config, etc.
+
+Example:
+feat(provider): add local-llama provider with llama-server
+fix(agent): prevent infinite subagent loop
+docs(cli): update command reference
+```
+
+## Pull Requests
+
+1. **Small, focused** — One feature/fix per PR
+2. **Tests pass** — `bun test` and `bun typecheck`
+3. **Docs updated** — If user-facing change
+4. **Changelog** — Add to `UPCOMING_CHANGELOG.md`
+
+## Adding a Provider
+
+```bash
+# 1. Add npm dependency to packages/opencode/package.json
+# 2. Import in packages/opencode/src/provider/provider.ts
+# 3. Add to BUNDLED_PROVIDERS
+# 4. Add custom loader in custom() if needed
+# 5. Add models to config schema
+# 6. Test: bun run --cwd packages/opencode dev
+```
+
+## Adding a Tool
+
+```bash
+# 1. Create packages/opencode/src/tool/mytool.ts
+# 2. Export Tool with name, description, parameters, execute
+# 3. Register in packages/opencode/src/tool/registry.ts
+# 4. Add to agent permissions in packages/opencode/src/agent/agent.ts
+# 5. Test
+```
+
+## Adding an Agent
+
+```bash
+# 1. Add to packages/opencode/src/agent/agent.ts Info schema
+# 2. Define prompt in packages/opencode/src/agent/prompts/
+# 3. Register in built-in agents
+# 4. Test with :agent command
+```
+
+## Release Process
+
+```bash
+# 1. Bump version in packages/opencode/package.json
+# 2. Run changelog script
+bun script/changelog.ts
+
+# 3. Create tag
+git tag v0.1.0
+
+# 4. Push tag (triggers GitHub Actions release)
+git push origin v0.1.0
+```
+
+## Code of Conduct
+
+- Be respectful
+- No harassment
+- Welcome newcomers
+- Focus on technical merit
+
+## License
+
+By contributing, you agree your contributions will be licensed under MIT.

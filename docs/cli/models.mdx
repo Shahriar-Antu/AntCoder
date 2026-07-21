@@ -1,0 +1,76 @@
+---
+title: Models CLI
+description: Model management commands
+---
+
+# Model Commands
+
+## List Models
+
+```bash
+:model
+```
+
+Output:
+```
+Available models:
+  local-llama/qwen2.5-coder-3b      Qwen2.5-Coder-3B     ✓ Downloaded
+  local-llama/qwen2.5-coder-1.5b    Qwen2.5-Coder-1.5B   ✓ Downloaded
+  local-llama/qwen2.5-coder-0.5b    Qwen2.5-Coder-0.5B   — Not downloaded
+```
+
+## Switch Model
+
+```bash
+:model qwen2.5-coder-1.5b
+```
+
+## Download Model
+
+```bash
+:model download qwen2.5-coder-3b
+:model download deepseek-coder-6.7b
+:model download starcoder2-3b
+```
+
+## Remove Model
+
+```bash
+:model remove qwen2.5-coder-0.5b
+```
+
+## Model Info
+
+```bash
+:model info qwen2.5-coder-3b
+```
+
+Output:
+```
+Model: qwen2.5-coder-3b
+Name: Qwen2.5-Coder-3B
+Size: 1.85 GB
+Context: 32K
+Tool Calling: ✓
+Status: Downloaded
+Path: ~/.config/antcoder/models/qwen2.5-coder-3b-instruct-q4_k_m.gguf
+```
+
+## Set Default
+
+```bash
+:model default qwen2.5-coder-1.5b
+```
+
+## CLI Flags
+
+```bash
+antcoder --model qwen2.5-coder-1.5b
+antcoder --model qwen2.5-coder-3b "write code"
+```
+
+## Environment
+
+```bash
+ANTODER_MODEL=local-llama/qwen2.5-coder-1.5b antcoder
+```

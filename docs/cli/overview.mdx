@@ -1,0 +1,68 @@
+---
+title: CLI Overview
+description: Terminal interface for AntCoder
+---
+
+# CLI Overview
+
+## Starting AntCoder
+
+```bash
+# Interactive TUI (default)
+antcoder
+
+# Single command
+antcoder "write a REST API in Go"
+
+# With options
+antcoder --model qwen2.5-coder-1.5b "refactor auth.ts"
+```
+
+## TUI Layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│  AntCoder 0.1.0  │  qwen2.5-coder-3b  │  2.1GB/8GB  │
+├─────────────────────────────────────────────────────┤
+│  > write a fizzbuzz in Python                       │
+├─────────────────────────────────────────────────────┤
+│  [Leader] Analyzing request...                      │
+│  [Explorer] Searching for patterns...               │
+│  [Coder] Writing fizzbuzz.py...                     │
+│  ✓ Created fizzbuzz.py                              │
+├─────────────────────────────────────────────────────┤
+│  > _                                                │
+└─────────────────────────────────────────────────────┘
+```
+
+## Key Areas
+
+| Area | Description |
+|------|-------------|
+| **Header** | Version, model, memory usage |
+| **Conversation** | Chat history with agent activity |
+| **Input** | Command/composer line |
+
+## Modes
+
+| Mode | Trigger | Description |
+|------|---------|-------------|
+| **Chat** | Default | Ask questions, get answers |
+| **Agent** | Auto | Multi-step tasks with tools |
+| **Command** | `:` | Built-in commands |
+
+## Navigation
+
+| Key | Action |
+|-----|--------|
+| `↑/↓` | Scroll history |
+| `Ctrl+L` | Clear screen |
+| `Ctrl+C` | Cancel current task |
+| `:` | Command mode |
+| `Esc` | Exit command mode |
+
+## Next
+
+- [Commands](/cli/commands) — All CLI commands
+- [Options](/cli/options) — Flags and environment variables
+- [Config](/cli/config) — Configuration file reference

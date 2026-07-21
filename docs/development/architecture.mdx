@@ -1,0 +1,138 @@
+---
+title: Development Architecture
+description: AntCoder internal architecture
+---
+
+# Architecture
+
+## High-Level
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        AntCoder                              │
+├─────────────────────────────────────────────────────────────┤
+│  Packages (Bun Workspace)                                    │
+├─────────────────────────────────────────────────────────────┤
+│  @antcoder/opencode   │  Core CLI, agents, tools, providers  │
+│  @antcoder/app        │  Web UI (Astro + SolidJS)            │
+│  @antcoder/desktop    │  Desktop app (Tauri + Rust)          │
+│  @antcoder/sdk        │  TypeScript SDK                      │
+│  @antcoder/script     │  Build/publish scripts               │
+│  @antcoder/util       │  Shared utilities                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Core Package (@antcoder/opencode)
+
+```
+packages/opencode/src/
+├── agent/           # Agent definitions, routing, prompts
+├── cli/             # CLI entry, commands, TUI
+│   ├── cmd/         # Command implementations
+│   └── tui/         # Terminal UI (SolidJS + @opentui)
+├── config/          # Config loading, validation
+├── orchestration/   # Leader/workers, spawn limits, loops
+├── provider/        # Model providers (Anthropic, OpenAI, local-llama)
+├── session/         # Session lifecycle, compaction, checkpoints
+├── storage/         # SQLite + Drizzle ORM
+├── tool/            # Built-in tools (read, write, bash, task, etc.)
+├── mcp/             # Model Context Protocol
+├── lsp/             # Language Server Protocol
+├── skill/           # Skill loading
+├── auth/            # API key management
+├── installation/    # Binary installation, updates
+└── util/            # Logging, hash, fs, etc.
+```
+
+## Key Flows
+
+### 1. Request Processing
+
+```
+User Input
+    │
+    ▼
+TUI (cli/tui/) → Session.prompt()
+    │
+    ▼
+Agent Router → Selects agent (leader/worker)
+    │
+    ▼
+Provider → Creates LLM client (local-llama, etc.)
+    │
+    ▼
+Tool Registry → Executes tools (read, write, bash, task)
+    │
+    ▼
+Response → Streaming → TUI
+```
+
+### 2. Leader + Workers
+
+```
+Leader Agent (orchestrator)
+    │
+    ├── Spawns Worker: Coder (write, edit, bash)
+    ├── Spawns Worker: Explorer (read, grep, glob)
+    └── Spawns Worker: Planner (read, write, todo)
+    │
+    └── Synthesizes results → User
+```
+
+### 3. Local LLM Flow
+
+```
+AntCoder Process
+    │
+    ├── Spawns llama-server (child process)
+    │       │
+    │       ├── Loads GGUF model
+    │       ├── Binds 127.0.0.1:8080
+    │       └── Serves /v1/chat/completions
+    │
+    └── HTTP Client → llama-server
+            │
+            └── OpenAI-compatible API
+```
+
+## Data Layer
+
+```
+SQLite (Drizzle ORM)
+├── sessions          # Session metadata
+├── messages          # Conversation history
+├── checkpoints       # Session snapshots
+├── usage             # Token/cost tracking
+├── skills            # Installed skills
+└── mcp_servers       # MCP server configs
+```
+
+## Build System
+
+```bash
+# Typecheck
+bun --cwd packages/opencode typecheck
+
+# Test
+bun --cwd packages/opencode test
+
+# Build binary (all platforms)
+bun --cwd packages/opencode run build:all
+
+# Build single platform
+bun --cwd packages/opencode run build --single
+```
+
+## Adding a Provider
+
+1. Add to `provider.ts` `BUNDLED_PROVIDERS`
+2. Add npm dependency
+3. Add custom loader in `custom()` if needed
+3. Add models to config schema
+
+## Adding a Tool
+
+1. Create `src/tool/<name>.ts`
+2. Export `Tool` with `name`, `description`, `parameters`, `execute`
+3. Register in `src/tool/registry.ts`
+4. Add to agent permissions

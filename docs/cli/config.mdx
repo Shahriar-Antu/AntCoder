@@ -1,0 +1,124 @@
+---
+title: CLI Configuration
+description: Configuration file reference
+---
+
+# Configuration Reference
+
+## File Locations
+
+| Platform | Path |
+|----------|------|
+| Linux | `~/.config/antcoder/antcoder.json` |
+| macOS | `~/Library/Application Support/antcoder/antcoder.json` |
+| Windows | `%APPDATA%\antcoder\antcoder.json` |
+
+## Schema
+
+```json
+{
+  "$schema": "https://antcoder.ai/config.json",
+  "model": "local-llama/qwen2.5-coder-3b",
+  "provider": { ... },
+  "llamaServer": { ... },
+  "agent": { ... },
+  "theme": "catppuccin-macchiato",
+  "keybindings": "default"
+}
+```
+
+## Full Example
+
+```json
+{
+  "$schema": "https://antcoder.ai/config.json",
+  "model": "local-llama/qwen2.5-coder-3b",
+  "provider": {
+    "local-llama": {
+      "name": "Local Llama",
+      "models": {
+        "qwen2.5-coder-3b": {
+          "name": "Qwen2.5-Coder-3B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": { "limit": 32768, "limit_output": 8192 }
+        },
+        "qwen2.5-coder-1.5b": {
+          "name": "Qwen2.5-Coder-1.5B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": { "limit": 32768, "limit_output": 8192 }
+        },
+        "qwen2.5-coder-0.5b": {
+          "name": "Qwen2.5-Coder-0.5B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": false,
+          "input": ["text"],
+          "context": { "limit": 32768, "limit_output": 4096 }
+        }
+      }
+    }
+  },
+  "llamaServer": {
+    "port": 8080,
+    "contextSize": 4096,
+    "gpuLayers": 99,
+    "sleepIdleSeconds": 300,
+    "modelsDir": "~/.config/antcoder/models"
+  },
+  "agent": {
+    "leaderModel": "local-llama/qwen2.5-coder-3b",
+    "workerModels": {
+      "coder": "local-llama/qwen2.5-coder-3b",
+      "explorer": "local-llama/qwen2.5-coder-1.5b",
+      "planner": "local-llama/qwen2.5-coder-3b"
+    },
+    "maxSubagents": 5,
+    "maxDepth": 3
+  },
+  "theme": "catppuccin-macchiato",
+  "keybindings": "default"
+}
+```
+
+## Theme Options
+
+| Theme | Description |
+|-------|-------------|
+| `catppuccin-macchiato` | Warm, colorful (default) |
+| `catppuccin-frappe` | Light variant |
+| `dracula` | Dark purple |
+| `nord` | Arctic, bluish |
+| `tokyonight` | Night blue |
+| `github-dark` | GitHub style |
+| `one-dark` | Atom One Dark |
+| `monokai` | Classic Monokai |
+| `solarized-dark` | Solarized |
+| `gruvbox` | Retro groove |
+
+## Keybinding Options
+
+| Scheme | Description |
+|--------|-------------|
+| `default` | Standard bindings |
+| `vim` | Vim-style |
+| `emacs` | Emacs-style |
+| `custom` | User-defined |
+
+## Validation
+
+```bash
+# Validate config
+antcoder config show
+
+# Edit in $EDITOR
+antcoder config edit
+
+# Reset to defaults
+antcoder config reset
+```

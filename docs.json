@@ -5,7 +5,7 @@
     "light": "/logo/antcoder-light.svg",
     "dark": "/logo/antcoder-dark.svg"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "/favicon.svg",
   "colors": {
     "primary": "#0D9373",
     "light": "#00C896",

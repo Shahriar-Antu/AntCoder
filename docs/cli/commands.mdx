@@ -1,0 +1,107 @@
+---
+title: CLI Commands
+description: All AntCoder CLI commands
+---
+
+# CLI Commands
+
+## Built-in Commands
+
+Type `:` in TUI to enter command mode.
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `:help` | `:h` | Show all commands |
+| `:model <name>` | `:m` | Switch model |
+| `:theme <name>` | `:t` | Change theme |
+| `:config` | `:c` | Open config file |
+| `:doctor` | `:d` | Health check |
+| `:clear` | `:cl` | Clear conversation |
+| `:exit` | `:q` | Quit AntCoder |
+
+## Model Commands
+
+```bash
+:model                    # List available models
+:model qwen2.5-coder-3b   # Switch to 3B model
+:model qwen2.5-coder-1.5b # Switch to 1.5B model
+:model download deepseek-coder-6.7b  # Download custom model
+```
+
+## Theme Commands
+
+```bash
+:theme                    # List themes
+:theme catppuccin-macchiato
+:theme dracula
+:theme nord
+:theme tokyonight
+```
+
+## Config Commands
+
+```bash
+:config                   # Open in $EDITOR
+:config show              # Print current config
+:config reset             # Reset to defaults
+```
+
+## Session Commands
+
+```bash
+:clear                    # Clear conversation
+:history                  # Show session history
+:save <name>              # Save session
+:load <name>              # Load session
+:delete <name>            # Delete saved session
+```
+
+## Agent Commands
+
+```bash
+:agent list               # List available agents
+:agent leader             # Use leader only
+:agent coder              # Use coder worker
+:agent explorer           # Use explorer worker
+:agent planner            # Use planner worker
+```
+
+## Tool Commands
+
+```bash
+:tool list                # List available tools
+:tool enable <name>       # Enable tool
+:tool disable <name>      # Disable tool
+```
+
+## File Commands
+
+```bash
+:file <path>              # Open file in context
+:read <path>              # Read file
+:write <path> <content>   # Write file
+:edit <path> <old> <new>  # Edit file
+:glob <pattern>           # Find files
+:grep <pattern>           # Search content
+:bash <command>           # Run shell command
+```
+
+## Debug Commands
+
+```bash
+:debug                    # Toggle debug mode
+:logs                     # Show recent logs
+:memory                   # Show memory usage
+:tokens                   # Show token usage
+```
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+C` | Cancel current task |
+| `Ctrl+L` | Clear screen |
+| `Ctrl+R` | Search history |
+| `Tab` | Autocomplete |
+| `↑/↓` | History navigation |
+| `Esc` | Exit command mode |

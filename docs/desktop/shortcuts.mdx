@@ -1,0 +1,87 @@
+---
+title: Keyboard Shortcuts
+description: Desktop app keyboard shortcuts
+---
+
+# Keyboard Shortcuts
+
+## Global (System-wide)
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+A` | Open AntCoder (configurable) |
+
+## Window
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+N` | New Session |
+| `Ctrl+Shift+N` | New Window |
+| `Ctrl+W` | Close Tab/Window |
+| `Ctrl+Shift+W` | Close Window |
+| `Ctrl+Q` | Quit App |
+| `Ctrl+M` | Minimize to Tray |
+| `F11` | Toggle Fullscreen |
+
+## Navigation
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+1-9` | Switch to Tab 1-9 |
+| `Ctrl+Tab` | Next Tab |
+| `Ctrl+Shift+Tab` | Previous Tab |
+| `Ctrl+Shift+T` | Reopen Closed Tab |
+| `Ctrl+L` | Focus Input |
+
+## Editing
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+C` | Copy |
+| `Ctrl+V` | Paste |
+| `Ctrl+X` | Cut |
+| `Ctrl+A` | Select All |
+| `Ctrl+Z` | Undo |
+| `Ctrl+Shift+Z` | Redo |
+| `Ctrl+F` | Find |
+| `Ctrl+Shift+F` | Find in Files |
+
+## View
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl++` | Zoom In |
+| `Ctrl+-` | Zoom Out |
+| `Ctrl+0` | Reset Zoom |
+| `Ctrl+Shift+I` | Toggle DevTools |
+
+## TUI (Inside Terminal)
+
+| Shortcut | Action |
+|----------|--------|
+| `:` | Command Mode |
+| `Esc` | Exit Command Mode |
+| `Ctrl+C` | Cancel Task |
+| `Ctrl+L` | Clear Screen |
+| `↑/↓` | History Navigation |
+| `Tab` | Autocomplete |
+| `Page Up/Down` | Scroll History |
+
+## Customization
+
+Edit `~/.config/antcoder/antcoder.json`:
+
+```json
+{
+  "desktop": {
+    "globalShortcut": "Ctrl+Shift+A",
+    "keybindings": {
+      "newSession": "Ctrl+N",
+      "closeWindow": "Ctrl+W",
+      "toggleTray": "Ctrl+Shift+T"
+    }
+  }
+}
+```
+
+Or use Settings UI: `File > Settings > Shortcuts`

@@ -1,0 +1,159 @@
+---
+title: Release Process
+description: How to create a new release
+---
+
+# Release Process
+
+## Versioning
+
+**SemVer**: `MAJOR.MINOR.PATCH`
+
+- **MAJOR**: Breaking changes
+- **MINOR**: New features (backward compatible)
+- **PATCH**: Bug fixes
+
+## Pre-release
+
+```bash
+# Beta
+v0.2.0-beta.1
+
+# Release candidate
+v0.2.0-rc.1
+
+# Alpha (internal)
+v0.2.0-alpha.1
+```
+
+## Release Checklist
+
+### 1. Prepare
+
+```bash
+# Ensure clean working tree
+git status
+
+# Run full test suite
+bun --cwd packages/opencode test
+bun --cwd packages/opencode typecheck
+
+# Build all platforms
+bun --cwd packages/opencode run build:all
+```
+
+### 2. Bump Version
+
+```bash
+# Edit packages/opencode/package.json
+# "version": "0.2.0"
+
+# Or use script
+bun script/version.ts 0.2.0
+```
+
+### 3. Generate Changelog
+
+```bash
+bun script/changelog.ts
+# Creates UPCOMING_CHANGELOG.md
+```
+
+### 4. Commit & Tag
+
+```bash
+git add packages/opencode/package.json UPCOMING_CHANGELOG.md
+git commit -m "chore: release v0.2.0"
+git tag v0.2.0
+git push origin main --tags
+```
+
+### 5. GitHub Actions (Automatic)
+
+The `release.yml` workflow:
+
+1. **Builds** all platform binaries
+2. **Creates** AppImage (Linux)
+3. **Builds** NSIS installer (Windows)
+4. **Generates** SHA256 checksums
+5. **Creates** GitHub Release
+6. **Uploads** all artifacts
+7. **Publishes** to Homebrew (if configured)
+8. **Publishes** to AUR (if configured)
+
+### 6. Verify Release
+
+```bash
+# Check release page
+open https://github.com/Shahriar-Antu/AntCoder/releases/tag/v0.2.0
+
+# Verify assets
+# - antcoder-linux-x64.tar.gz
+# - antcoder-linux-arm64.tar.gz
+# - antcoder-darwin-x64.zip
+# - antcoder-darwin-arm64.zip
+# - antcoder-win32-x64.zip
+# - AntCoder-*.AppImage
+# - AntCoder-Setup-x64.exe
+# - SHA256SUMS.txt
+```
+
+### 7. Post-Release
+
+```bash
+# Update Homebrew formula (if manual)
+# Update AUR package (if manual)
+# Announce on Discord/Twitter
+# Close related issues
+```
+
+## Rollback
+
+```bash
+# Delete tag locally & remote
+git tag -d v0.2.0
+git push origin :refs/tags/v0.2.0
+
+# Delete GitHub release (UI or API)
+gh release delete v0.2.0
+```
+
+## Hotfix
+
+```bash
+# From main branch
+git checkout -b hotfix/0.2.1
+
+# Fix bug
+# ...
+
+# Bump patch version
+bun script/version.ts 0.2.1
+
+# Follow release process
+```
+
+## Automation
+
+| Step | Automated? |
+|------|------------|
+| Build binaries | ✅ GitHub Actions |
+| AppImage | ✅ GitHub Actions |
+| Windows installer | ✅ GitHub Actions |
+| Checksums | ✅ GitHub Actions |
+| GitHub Release | ✅ GitHub Actions |
+| Homebrew | ⚠️ Manual PR to homebrew-tap |
+| AUR | ⚠️ Manual push to AUR |
+| npm publish | ❌ Manual (binary only) |
+
+## Binary Distribution
+
+| Platform | Format | Install |
+|----------|--------|---------|
+| Linux x64 | `.tar.gz` | `tar -xzf` |
+| Linux ARM64 | `.tar.gz` | `tar -xzf` |
+| Linux | `.AppImage` | `chmod +x && ./` |
+| macOS x64 | `.zip` | Unzip |
+| macOS ARM64 | `.zip` | Unzip |
+| Windows x64 | `.zip` | Unzip |
+| Windows x64 | `.exe` (NSIS) | Run installer |

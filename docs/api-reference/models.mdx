@@ -1,0 +1,125 @@
+---
+title: Models API
+description: Model management and configuration
+---
+
+# Models API
+
+## Model Configuration
+
+```json
+{
+  "provider": {
+    "local-llama": {
+      "models": {
+        "model-id": {
+          "name": "Display Name",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 8192
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Model Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | string | Yes | Display name |
+| `attachment` | boolean | No | Supports file attachments |
+| `reasoning` | boolean | No | Shows reasoning traces |
+| `toolcall` | boolean | No | Supports function calling |
+| `input` | string[] | No | Input modalities (default: `["text"]`) |
+| `context.limit` | number | No | Max context tokens |
+| `context.limit_output` | number | No | Max output tokens |
+
+## Default Models
+
+```json
+{
+  "qwen2.5-coder-3b": {
+    "name": "Qwen2.5-Coder-3B",
+    "toolcall": true,
+    "context": { "limit": 32768, "limit_output": 8192 }
+  },
+  "qwen2.5-coder-1.5b": {
+    "name": "Qwen2.5-Coder-1.5B",
+    "toolcall": true,
+    "context": { "limit": 32768, "limit_output": 8192 }
+  },
+  "qwen2.5-coder-0.5b": {
+    "name": "Qwen2.5-Coder-0.5B",
+    "toolcall": false,
+    "context": { "limit": 32768, "limit_output": 4096 }
+  }
+}
+```
+
+## Model Commands
+
+```bash
+# List available
+antcoder model list
+
+# Download
+antcoder model download qwen2.5-coder-3b
+antcoder model download deepseek-coder-6.7b
+
+# Remove
+antcoder model remove qwen2.5-coder-0.5b
+
+# Info
+antcoder model info qwen2.5-coder-3b
+
+# Set default
+antcoder model default qwen2.5-coder-3b
+```
+
+## Custom Models
+
+Add any GGUF from HuggingFace:
+
+```json
+{
+  "provider": {
+    "local-llama": {
+      "models": {
+        "my-model": {
+          "name": "My Custom Model",
+          "toolcall": true,
+          "context": { "limit": 16384 }
+        }
+      }
+    }
+  }
+}
+```
+
+Then download:
+
+```bash
+antcoder model download my-model
+```
+
+Or place GGUF manually:
+
+```bash
+cp model.gguf ~/.config/antcoder/models/my-model.gguf
+```
+
+## Model Resolution
+
+Priority order:
+
+1. CLI flag `--model`
+2. Config `model` field
+3. Environment `ANTODER_MODEL`
+4. Default: `local-llama/qwen2.5-coder-3b`

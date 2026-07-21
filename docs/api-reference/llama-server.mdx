@@ -1,0 +1,156 @@
+---
+title: llama-server API
+description: llama.cpp HTTP server endpoints
+---
+
+# llama-server API
+
+## Overview
+
+AntCoder spawns `llama-server` as a child process on `127.0.0.1:8080`.
+
+## Endpoints
+
+### Health Check
+
+```bash
+GET /health
+```
+
+```json
+{"status": "ok"}
+```
+
+### Server Properties
+
+```bash
+GET /props
+```
+
+```json
+{
+  "model": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+  "context_size": 4096,
+  "n_gpu_layers": 99,
+  "embedding": false,
+  "reranking": false
+}
+```
+
+### List Models
+
+```bash
+GET /v1/models
+```
+
+```json
+{
+  "object": "list",
+  "data": [{
+    "id": "local",
+    "object": "model",
+    "created": 1234567890,
+    "owned_by": "local"
+  }]
+}
+```
+
+### Chat Completions
+
+```bash
+POST /v1/chat/completions
+Content-Type: application/json
+
+{
+  "model": "local",
+  "messages": [...],
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "max_tokens": 2048,
+  "stream": false,
+  "tools": [...],
+  "tool_choice": "auto"
+}
+```
+
+### Completions (Legacy)
+
+```bash
+POST /v1/completions
+Content-Type: application/json
+
+{
+  "model": "local",
+  "prompt": "def fizzbuzz(n):",
+  "max_tokens": 100,
+  "temperature": 0.2
+}
+```
+
+### Embeddings
+
+```bash
+POST /v1/embeddings
+Content-Type: application/json
+
+{
+  "model": "local",
+  "input": "text to embed"
+}
+```
+
+### Infill (Code Completion)
+
+```bash
+POST /infill
+Content-Type: application/json
+
+{
+  "prompt": "def foo():\n    ",
+  "suffix": "\n    return 42"
+}
+```
+
+### Slots (Parallel Decoding)
+
+```bash
+GET /slots
+```
+
+```json
+{
+  "idle": [0, 1],
+  "busy": [2]
+}
+```
+
+## Starting llama-server
+
+```bash
+# Auto-download model
+llama-server -hf bartowski/Qwen2.5-Coder-3B-Instruct-GGUF:Q4_K_M
+
+# Local model
+llama-server -m ~/models/qwen2.5-coder-3b.gguf
+
+# Common options
+llama-server \
+  -m model.gguf \
+  -c 4096 \
+  -ngl 99 \
+  --port 8080 \
+  --host 127.0.0.1 \
+  --sleep-idle-seconds 300 \
+  --api-key sk-xxx \
+  --ssl-key-file key.pem \
+  --ssl-cert-file cert.pem
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `LLAMA_CACHE` | Model cache directory |
+| `HF_TOKEN` | HuggingFace token for gated models |
+| `CUDA_VISIBLE_DEVICES` | GPU selection |
+| `GGML_METAL_LOG_LEVEL` | Metal logging (macOS) |

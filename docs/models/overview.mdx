@@ -1,19 +1,19 @@
 ---
 title: Models
-description: Available models and how to add custom ones
+description: Available models, hardware requirements, and custom models
 ---
 
 # Models
 
 ## Default Models
 
-| Model | Size | RAM | Context | Best For |
-|-------|------|-----|---------|----------|
-| **Qwen2.5-Coder-3B** | 1.85 GB | 3 GB | 32K | **Default** — General coding |
-| Qwen2.5-Coder-1.5B | 1.0 GB | 2 GB | 32K | Fast completion, edge devices |
-| Qwen2.5-Coder-0.5B | 0.4 GB | 1 GB | 32K | Minimal hardware |
+| Model | Size | RAM (CPU) | VRAM (GPU) | Context | Best For |
+|-------|------|-----------|------------|---------|----------|
+| **Qwen2.5-Coder-3B** | 1.85 GB | 3 GB | 2.2 GB | 32K | **Default** — General coding |
+| Qwen2.5-Coder-1.5B | 1.0 GB | 2 GB | 1.5 GB | 32K | Fast completion, edge |
+| Qwen2.5-Coder-0.5B | 0.4 GB | 1 GB | 0.8 GB | 32K | Minimal hardware |
 
-All models are **Apache 2.0** licensed.
+All models: **Apache 2.0** license, quantized to **Q4_K_M** (4-bit).
 
 ## Switching Models
 
@@ -21,12 +21,12 @@ All models are **Apache 2.0** licensed.
 # CLI command
 :model qwen2.5-coder-1.5b
 
-# Config
+# Config file
 {
   "model": "local-llama/qwen2.5-coder-1.5b"
 }
 
-# Environment
+# Environment variable
 ANTODER_MODEL=local-llama/qwen2.5-coder-1.5b antcoder
 ```
 
@@ -79,39 +79,28 @@ antcoder model download deepseek-coder-6.7b
 
 | Model | Size | License | Notes |
 |-------|------|---------|-------|
-| **Qwen2.5-Coder-3B** | 1.85 GB | Apache 2.0 | Best balance |
-| **Qwen2.5-Coder-7B** | 4.2 GB | Apache 2.0 | Higher quality |
-| **DeepSeek-Coder-6.7B** | 4.2 GB | Apache 2.0 | Strong coding |
-| **StarCoder2-3B** | 1.6 GB | Apache 2.0 | Multi-language |
-| **CodeLlama-7B** | 4.2 GB | Llama 2 | Meta's model |
-| **Phi-3.5-mini** | 2.3 GB | MIT | Microsoft, fast |
+| Qwen2.5-Coder-3B | 1.85 GB | Apache 2.0 | Best balance |
+| Qwen2.5-Coder-7B | 4.2 GB | Apache 2.0 | Higher quality |
+| DeepSeek-Coder-6.7B | 4.2 GB | Apache 2.0 | Strong coding |
+| StarCoder2-3B | 1.6 GB | Apache 2.0 | Multi-language |
+| CodeLlama-7B | 4.2 GB | Llama 2 | Meta's model |
+| Phi-3.5-mini | 2.3 GB | MIT | Microsoft, fast |
 
 ## Quantization Guide
 
 | Suffix | Bits | Quality | Speed | Use Case |
 |--------|------|---------|-------|----------|
-| Q4_K_M | 4-bit | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | **Recommended** |
+| **Q4_K_M** | 4-bit | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | **Recommended** |
 | Q5_K_M | 5-bit | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Higher quality |
 | Q8_0 | 8-bit | ⭐⭐⭐⭐⭐ | ⭐⭐ | Near FP16 |
 | Q2_K | 2-bit | ⭐⭐ | ⭐⭐⭐⭐⭐ | Extreme compression |
 
-## Model Requirements by Task
-
-| Task | Min Model | Recommended |
-|------|-----------|-------------|
-| Code Completion | 0.5B | 1.5B |
-| Bug Fixing | 1.5B | 3B |
-| Refactoring | 3B | 7B |
-| Architecture Design | 3B | 7B |
-| Test Generation | 1.5B | 3B |
-| Documentation | 1.5B | 3B |
-
-## Hardware Recommendations
+## Hardware Requirements
 
 | Hardware | Recommended Model |
 |----------|-------------------|
 | 8GB RAM, No GPU | Qwen2.5-Coder-1.5B (Q4) |
-| 16GB RAM, No GPU | Qwen2.5-Coder-3B (Q4) |
+| 16GB RAM, No GPU | **Qwen2.5-Coder-3B (Q4)** |
 | 16GB RAM + 8GB VRAM | Qwen2.5-Coder-7B (Q4) |
 | 32GB RAM + 12GB VRAM | Qwen2.5-Coder-7B (Q5) / DeepSeek 6.7B |
 | MacBook M2/M3 16GB | Qwen2.5-Coder-3B (Metal) |
