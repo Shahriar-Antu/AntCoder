@@ -29,7 +29,7 @@ packages/opencode/src/
   agent/          # definitions + routing
   orchestration/  # task spawning, model resolver
   cli/cmd/tui/    # @opentui Solid-based TUI
-  provider/       # AI wrappers (Anthropic, OpenAI, etc.)
+  provider/       # AI wrappers (Anthropic, OpenAI, local-llama)
   storage/        # SQLite via Drizzle
   effect/         # Effect-ts (InstanceState, run-service)
   config/         # config loading
@@ -41,7 +41,7 @@ packages/opencode/src/
 
 ## Tech Stack
 
-Bun 1.3.11 | TypeScript 5.8 (tsgo) | Effect-ts 4.0-beta | @opentui/core+solid | AI SDK 6.x | SQLite+drizzle-orm | Turborepo+Bun workspaces | Logs: ~/.local/share/opencode/log
+Bun 1.3.11 | TypeScript 5.8 (tsgo) | Effect-ts 4.0-beta | @opentui/core+solid | AI SDK 6.x | SQLite+drizzle-orm | Turborepo+Bun workspaces | Logs: ~/.local/share/antcoder/log
 
 ## Style
 
@@ -76,13 +76,13 @@ Bun 1.3.11 | TypeScript 5.8 (tsgo) | Effect-ts 4.0-beta | @opentui/core+solid | 
 # 2. Pack (prepack strips deps)
 cd packages/opencode && npm pack
 # 3. Verify zero deps
-tar -xzf sdeonvacation-opencode-x-<ver>.tgz
+tar -xzf antcoder-<ver>.tgz
 node -e "const p=require('./package/package.json'); console.log(p.dependencies, p.devDependencies)"
 # Must print: undefined undefined
 rm -rf package
 # 4. Publish FROM tarball (not `npm publish .`)
-npm publish sdeonvacation-opencode-x-<ver>.tgz --access public --registry https://registry.npmjs.org/
-# 5. Verify: npm view @sdeonvacation/opencode-x@<ver> dependencies
+npm publish antcoder-<ver>.tgz --access public --registry https://registry.npmjs.org/
+# 5. Verify: npm view antcoder@<ver> dependencies
 # 6. GitHub release: tag v<ver>, target main, upload 12 platform binaries
 ```
 

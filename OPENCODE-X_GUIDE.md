@@ -614,5 +614,5 @@ Subdirectory `AGENTS.md` files auto-load when reading files in that directory.
 
 ## Resources
 
-- **Repository**: https://github.com/sdeonvacation/opencode-x
+- **Repository**: https://github.com/Shahriar-Antu/AntCoder
 - **Opencode Docs**: https://opencode.ai/docs

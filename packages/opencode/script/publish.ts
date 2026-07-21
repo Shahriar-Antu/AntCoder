@@ -70,32 +70,32 @@ if (!Script.preview) {
     "# Maintainer: dax",
     "# Maintainer: adam",
     "",
-    "pkgname='opencode-bin'",
+    "pkgname='antcoder-bin'",
     `pkgver=${pkgver}`,
     `_subver=${_subver}`,
     "options=('!debug' '!strip')",
     "pkgrel=1",
-    "pkgdesc='The AI coding agent built for the terminal.'",
-    "url='https://github.com/sdeonvacation/opencode-x'",
+    "pkgdesc='Local-only AI coding agent with llama.cpp backend.'",
+    "url='https://github.com/Shahriar-Antu/AntCoder'",
     "arch=('aarch64' 'x86_64')",
     "license=('MIT')",
-    "provides=('opencode')",
-    "conflicts=('opencode')",
+    "provides=('antcoder')",
+    "conflicts=('antcoder')",
     "depends=('ripgrep')",
     "",
-    `source_aarch64=("\${pkgname}_\${pkgver}_aarch64.tar.gz::https://github.com/sdeonvacation/opencode-x/releases/download/v\${pkgver}\${_subver}/opencode-linux-arm64.tar.gz")`,
+    `source_aarch64=("\${pkgname}_\${pkgver}_aarch64.tar.gz::https://github.com/Shahriar-Antu/AntCoder/releases/download/v\${pkgver}\${_subver}/antcoder-linux-arm64.tar.gz")`,
     `sha256sums_aarch64=('${arm64Sha}')`,
 
-    `source_x86_64=("\${pkgname}_\${pkgver}_x86_64.tar.gz::https://github.com/sdeonvacation/opencode-x/releases/download/v\${pkgver}\${_subver}/opencode-linux-x64.tar.gz")`,
+    `source_x86_64=("\${pkgname}_\${pkgver}_x86_64.tar.gz::https://github.com/Shahriar-Antu/AntCoder/releases/download/v\${pkgver}\${_subver}/antcoder-linux-x64.tar.gz")`,
     `sha256sums_x86_64=('${x64Sha}')`,
     "",
     "package() {",
-    '  install -Dm755 ./opencode "${pkgdir}/usr/bin/opencode"',
+    '  install -Dm755 ./antcoder "${pkgdir}/usr/bin/antcoder"',
     "}",
     "",
   ].join("\n")
 
-  for (const [pkg, pkgbuild] of [["opencode-bin", binaryPkgbuild]]) {
+  for (const [pkg, pkgbuild] of [["antcoder-bin", binaryPkgbuild]]) {
     for (let i = 0; i < 30; i++) {
       try {
         await $`rm -rf ./dist/aur-${pkg}`
@@ -171,11 +171,11 @@ if (!Script.preview) {
     console.error("GITHUB_TOKEN is required to update homebrew tap")
     process.exit(1)
   }
-  const tap = `https://x-access-token:${token}@github.com/anomalyco/homebrew-tap.git`
+  const tap = `https://x-access-token:${token}@github.com/Shahriar-Antu/homebrew-tap.git`
   await $`rm -rf ./dist/homebrew-tap`
   await $`git clone ${tap} ./dist/homebrew-tap`
-  await Bun.file("./dist/homebrew-tap/opencode.rb").write(homebrewFormula)
-  await $`cd ./dist/homebrew-tap && git add opencode.rb`
+  await Bun.file("./dist/homebrew-tap/antcoder.rb").write(homebrewFormula)
+  await $`cd ./dist/homebrew-tap && git add antcoder.rb`
   await $`cd ./dist/homebrew-tap && git commit -m "Update to v${Script.version}"`
   await $`cd ./dist/homebrew-tap && git push`
 }

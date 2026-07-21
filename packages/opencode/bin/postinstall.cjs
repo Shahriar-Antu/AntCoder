@@ -6,7 +6,7 @@ const fs = require("fs")
 const path = require("path")
 const os = require("os")
 
-const REPO = "sdeonvacation/opencode-x"
+const REPO = "Shahriar-Antu/AntCoder"
 const pkg = require("../package.json")
 const VERSION = pkg.version
 
@@ -22,7 +22,7 @@ if (!platform || !arch) {
 }
 
 const ext = platform === "windows" ? ".exe" : ""
-const asset = `opencode-x-${platform}-${arch}${ext}`
+const asset = `antcoder-${platform}-${arch}${ext}`
 const dest = path.join(__dirname, ".opencode")
 
 function fetch(url, redirects) {
@@ -32,7 +32,7 @@ function fetch(url, redirects) {
   }
   const mod = url.startsWith("https") ? https : http
   mod
-    .get(url, { headers: { "User-Agent": "opencode-x-postinstall" } }, (res) => {
+    .get(url, { headers: { "User-Agent": "antcoder-postinstall" } }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return fetch(res.headers.location, redirects + 1)
       }
@@ -48,7 +48,7 @@ function fetch(url, redirects) {
         file.close(() => {
           fs.chmodSync(tmp, 0o755)
           fs.renameSync(tmp, dest)
-          console.log(`opencode-x v${VERSION} installed successfully`)
+          console.log(`antcoder v${VERSION} installed successfully`)
         })
       })
     })

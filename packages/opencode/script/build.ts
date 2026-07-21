@@ -180,7 +180,7 @@ if (!skipInstall) {
 }
 for (const item of targets) {
   const name = [
-    "opencode-x",
+    "antcoder",
     // changing to win32 flags npm for some reason
     item.os === "win32" ? "windows" : item.os,
     item.arch,
@@ -211,15 +211,15 @@ for (const item of targets) {
       autoloadDotenv: false,
       autoloadTsconfig: true,
       autoloadPackageJson: true,
-      target: name.replace("opencode-x", "bun") as any,
-      outfile: `dist/${name}/bin/opencode`,
-      execArgv: [`--user-agent=opencode/${Script.version}`, "--use-system-ca", "--"],
+      target: name.replace("antcoder", "bun") as any,
+      outfile: `dist/${name}/bin/antcoder`,
+      execArgv: [`--user-agent=antcoder/${Script.version}`, "--use-system-ca", "--"],
       windows: {},
     },
     files: {
-      ...(embeddedFileMap ? { "opencode-web-ui.gen.ts": embeddedFileMap } : {}),
+      ...(embeddedFileMap ? { "antcoder-web-ui.gen.ts": embeddedFileMap } : {}),
     },
-    entrypoints: ["./src/index.ts", parserWorker, workerPath, ...(embeddedFileMap ? ["opencode-web-ui.gen.ts"] : [])],
+    entrypoints: ["./src/index.ts", parserWorker, workerPath, ...(embeddedFileMap ? ["antcoder-web-ui.gen.ts"] : [])],
     define: {
       OPENCODE_X_VERSION: `'${Script.version}'`,
       OPENCODE_MIGRATIONS: JSON.stringify(migrations),

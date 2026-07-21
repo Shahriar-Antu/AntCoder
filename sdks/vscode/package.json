@@ -1,12 +1,12 @@
 {
-  "name": "opencode",
-  "displayName": "opencode",
-  "description": "opencode for VS Code",
-  "version": "1.4.3",
-  "publisher": "sst-dev",
-  "repository": {
+  "name": "antcoder",
+  "displayName": "AntCoder",
+  "description": "Local-only AI coding agent with llama.cpp backend",
+  "version": "0.1.0",
+  "publisher": "Shahriar-Antu",
+"repository": {
     "type": "git",
-    "url": "https://github.com/sdeonvacation/opencode-x"
+    "url": "https://github.com/Shahriar-Antu/AntCoder"
   },
   "license": "MIT",
   "icon": "images/icon.png",

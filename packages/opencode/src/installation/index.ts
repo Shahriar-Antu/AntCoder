@@ -138,20 +138,20 @@ export namespace Installation {
         )
 
         const getBrewFormula = Effect.fnUntraced(function* () {
-          const tapFormula = yield* text(["brew", "list", "--formula", "anomalyco/tap/opencode"])
-          if (tapFormula.includes("opencode")) return "anomalyco/tap/opencode"
-          const coreFormula = yield* text(["brew", "list", "--formula", "opencode"])
-          if (coreFormula.includes("opencode")) return "opencode"
-          return "opencode"
+          const tapFormula = yield* text(["brew", "list", "--formula", "Shahriar-Antu/tap/antcoder"])
+          if (tapFormula.includes("antcoder")) return "Shahriar-Antu/tap/antcoder"
+          const coreFormula = yield* text(["brew", "list", "--formula", "antcoder"])
+          if (coreFormula.includes("antcoder")) return "antcoder"
+          return "antcoder"
         })
 
-        const GITHUB_REPO = "sdeonvacation/opencode-x"
+        const GITHUB_REPO = "Shahriar-Antu/AntCoder"
 
         function assetName() {
           const platform = process.platform === "win32" ? "windows" : process.platform
           const arch = process.arch === "arm64" ? "arm64" : "x64"
           const ext = process.platform === "win32" ? ".exe" : ""
-          return `opencode-x-${platform}-${arch}${ext}`
+          return `antcoder-${platform}-${arch}${ext}`
         }
 
         const upgradeCurl = Effect.fnUntraced(
