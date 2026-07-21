@@ -1,0 +1,28 @@
+Create and manage a structured task list for the current session. Shows user progress on their requests.
+
+## When to Use
+
+- 3+ step tasks or multiple tasks given at once
+- User explicitly requests a todo list
+- After completing a task (mark complete, add follow-ups)
+- Mark in_progress when starting work (max ONE at a time)
+
+## When NOT to Use
+
+- Single straightforward task (<3 trivial steps)
+- Purely conversational/informational requests
+
+## States
+
+- pending: not started
+- in_progress: actively working (ONE at a time)
+- completed: finished
+- cancelled: no longer needed
+
+## Rules
+
+- Update status immediately on change
+- Mark complete right after finishing (don't batch)
+- Complete current before starting new
+- Create specific, actionable items
+- When in doubt, use this tool

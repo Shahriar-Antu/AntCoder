@@ -1,0 +1,1 @@
+Execute a workflow script in an isolated QuickJS sandbox. Workflows orchestrate multi-agent pipelines with deterministic replay.

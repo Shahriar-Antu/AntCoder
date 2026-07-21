@@ -1,0 +1,143 @@
+import { InstanceState } from "@/effect/instance-state"
+import { Runner } from "@/effect/runner"
+import { makeRuntime } from "@/effect/run-service"
+import { Deferred, Effect, Fiber, Layer, Scope, ServiceMap } from "effect"
+import { Session } from "."
+import { MessageV2 } from "./message-v2"
+import { SessionID } from "./schema"
+import { SessionStatus } from "./status"
+
+export namespace SessionRunState {
+  // [fork-perf] Phase 4: per-step snapshot-gate state fields (used by ProcessorContext)
+  export interface SnapshotGateFields {
+    fsToolFired: boolean
+    lastSnapshotAt?: string
+  }
+
+  export interface Interface {
+    readonly assertNotBusy: (sessionID: SessionID) => Effect.Effect<void>
+    readonly awaitIdle: (sessionID: SessionID) => Effect.Effect<void>
+    readonly cancel: (sessionID: SessionID) => Effect.Effect<void>
+    readonly ensureRunning: (
+      sessionID: SessionID,
+      onInterrupt: Effect.Effect<MessageV2.WithParts>,
+      work: Effect.Effect<MessageV2.WithParts>,
+    ) => Effect.Effect<MessageV2.WithParts>
+    readonly startShell: (
+      sessionID: SessionID,
+      onInterrupt: Effect.Effect<MessageV2.WithParts>,
+      work: Effect.Effect<MessageV2.WithParts>,
+    ) => Effect.Effect<MessageV2.WithParts>
+    // fork: background-detach (#FORK) — begin
+    readonly peek: (sessionID: SessionID) => Effect.Effect<Runner<MessageV2.WithParts> | undefined>
+    // fork: background-detach (#FORK) — end
+  }
+
+  export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/SessionRunState") {}
+
+  export const layer = Layer.effect(
+    Service,
+    Effect.gen(function* () {
+      const status = yield* SessionStatus.Service
+
+      const state = yield* InstanceState.make(
+        Effect.fn("SessionRunState.state")(function* () {
+          const scope = yield* Scope.Scope
+          const runners = new Map<SessionID, Runner<MessageV2.WithParts>>()
+          yield* Effect.addFinalizer(
+            Effect.fnUntraced(function* () {
+              yield* Effect.forEach(runners.values(), (runner) => runner.cancel, {
+                concurrency: "unbounded",
+                discard: true,
+              })
+              runners.clear()
+            }),
+          )
+          return { runners, scope }
+        }),
+      )
+
+      const runner = Effect.fn("SessionRunState.runner")(function* (
+        sessionID: SessionID,
+        onInterrupt: Effect.Effect<MessageV2.WithParts>,
+      ) {
+        const data = yield* InstanceState.get(state)
+        const existing = data.runners.get(sessionID)
+        if (existing) return existing
+        const next = Runner.make<MessageV2.WithParts>(data.scope, {
+          onIdle: Effect.gen(function* () {
+            data.runners.delete(sessionID)
+            yield* status.set(sessionID, { type: "idle" })
+          }),
+          onBusy: status.set(sessionID, { type: "busy" }),
+          onInterrupt,
+          busy: () => {
+            throw new Session.BusyError(sessionID)
+          },
+        })
+        data.runners.set(sessionID, next)
+        return next
+      })
+
+      const assertNotBusy = Effect.fn("SessionRunState.assertNotBusy")(function* (sessionID: SessionID) {
+        const data = yield* InstanceState.get(state)
+        const existing = data.runners.get(sessionID)
+        if (existing?.busy) throw new Session.BusyError(sessionID)
+      })
+
+      const cancel = Effect.fn("SessionRunState.cancel")(function* (sessionID: SessionID) {
+        const data = yield* InstanceState.get(state)
+        const existing = data.runners.get(sessionID)
+        if (!existing) {
+          yield* status.set(sessionID, { type: "idle" })
+          return
+        }
+        yield* existing.cancel
+      })
+
+      const ensureRunning = Effect.fn("SessionRunState.ensureRunning")(function* (
+        sessionID: SessionID,
+        onInterrupt: Effect.Effect<MessageV2.WithParts>,
+        work: Effect.Effect<MessageV2.WithParts>,
+      ) {
+        return yield* (yield* runner(sessionID, onInterrupt)).ensureRunning(work)
+      })
+
+      const startShell = Effect.fn("SessionRunState.startShell")(function* (
+        sessionID: SessionID,
+        onInterrupt: Effect.Effect<MessageV2.WithParts>,
+        work: Effect.Effect<MessageV2.WithParts>,
+      ) {
+        return yield* (yield* runner(sessionID, onInterrupt)).startShell(work)
+      })
+
+      // fork: background-detach (#FORK) — begin
+      const peek = Effect.fn("SessionRunState.peek")(function* (sessionID: SessionID) {
+        const data = yield* InstanceState.get(state)
+        return data.runners.get(sessionID)
+      })
+      // fork: background-detach (#FORK) — end
+
+      const awaitIdle = Effect.fn("SessionRunState.awaitIdle")(function* (sessionID: SessionID) {
+        const data = yield* InstanceState.get(state)
+        const existing = data.runners.get(sessionID)
+        if (!existing) return
+        const st = existing.state
+        if (st._tag === "Running" || st._tag === "ShellThenRun") {
+          yield* Deferred.await(st.run.done).pipe(Effect.exit, Effect.asVoid)
+        } else if (st._tag === "Shell") {
+          yield* Fiber.await(st.shell.fiber).pipe(Effect.asVoid)
+        }
+      })
+
+      return Service.of({ assertNotBusy, awaitIdle, cancel, ensureRunning, startShell, peek })
+    }),
+  )
+
+  export const defaultLayer = layer.pipe(Layer.provide(SessionStatus.defaultLayer))
+  const { runPromise } = makeRuntime(Service, defaultLayer)
+
+  export async function assertNotBusy(sessionID: SessionID) {
+    return runPromise((svc) => svc.assertNotBusy(sessionID))
+  }
+}

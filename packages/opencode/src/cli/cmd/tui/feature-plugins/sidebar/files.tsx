@@ -1,0 +1,118 @@
+import path from "path"
+import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@opencode-ai/plugin/tui"
+import { createMemo, For, Show, createSignal } from "solid-js"
+
+const id = "internal:sidebar-files"
+
+export function rel(api: TuiPluginApi, file: string) {
+  const next = file.replaceAll("\\", "/")
+  if (!path.isAbsolute(file)) return next
+  const root = api.state.path.worktree || api.state.path.directory
+  if (!root) return next
+  return path.relative(root, file).replaceAll("\\", "/")
+}
+
+export function merge(api: TuiPluginApi, files: string[]) {
+  const seen = new Set<string>()
+  const vcs = new Map((api.state.vcs?.files ?? []).map((item) => [rel(api, item.file), item] as const))
+  return files
+    .map((file) => rel(api, file))
+    .filter((file) => {
+      if (seen.has(file)) return false
+      seen.add(file)
+      return true
+    })
+    .map((file) => ({
+      file,
+      additions: vcs.get(file)?.additions ?? 0,
+      deletions: vcs.get(file)?.deletions ?? 0,
+    }))
+}
+
+function sessions(api: TuiPluginApi, sessionID: string) {
+  const seen = new Set<string>()
+  const walk = (id: string): string[] => {
+    if (seen.has(id)) return []
+    seen.add(id)
+    return [id, ...api.state.session.children(id).flatMap((item) => walk(item.id))]
+  }
+  return walk(sessionID)
+}
+
+function View(props: { api: TuiPluginApi; session_id: string }) {
+  const [open, setOpen] = createSignal(true)
+  const theme = () => props.api.theme.current
+  const files = createMemo(() => {
+    return merge(
+      props.api,
+      sessions(props.api, props.session_id)
+        .flatMap((id) => props.api.state.session.messages(id))
+        .flatMap((msg) => props.api.state.part(msg.id))
+        .filter((part) => part.type === "patch")
+        .flatMap((part) => part.files),
+    )
+  })
+  const list = createMemo(() => {
+    const vcs = props.api.state.vcs?.files
+    // When VCS data is available, use it as source of truth so the list
+    // survives /clear-compact (which deletes messages but not git state).
+    if (vcs)
+      return merge(
+        props.api,
+        vcs.map((f) => f.file),
+      )
+    return files()
+  })
+
+  return (
+    <Show when={list().length > 0}>
+      <box>
+        <box flexDirection="row" gap={1} onMouseDown={() => list().length > 2 && setOpen((x) => !x)}>
+          <Show when={list().length > 2}>
+            <text fg={theme().text}>{open() ? "▼" : "▶"}</text>
+          </Show>
+          <text fg={theme().text}>
+            <b>Modified Files</b>
+          </text>
+        </box>
+        <Show when={list().length <= 2 || open()}>
+          <For each={list()}>
+            {(item) => (
+              <box flexDirection="row" gap={1} justifyContent="space-between">
+                <text fg={theme().textMuted} wrapMode="word" flexGrow={1}>
+                  {item.file}
+                </text>
+                <box flexDirection="row" gap={1} flexShrink={0}>
+                  <Show when={item.additions}>
+                    <text fg={theme().diffAdded}>+{item.additions}</text>
+                  </Show>
+                  <Show when={item.deletions}>
+                    <text fg={theme().diffRemoved}>-{item.deletions}</text>
+                  </Show>
+                </box>
+              </box>
+            )}
+          </For>
+        </Show>
+      </box>
+    </Show>
+  )
+}
+
+const tui: TuiPlugin = async (api) => {
+  api.slots.register({
+    order: 500,
+    slots: {
+      sidebar_content(_ctx, props) {
+        return <View api={api} session_id={props.session_id} />
+      },
+    },
+  })
+}
+
+const plugin: TuiPluginModule & { id: string } = {
+  id,
+  tui,
+}
+
+export default plugin

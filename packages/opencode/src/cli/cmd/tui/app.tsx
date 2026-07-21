@@ -1,0 +1,744 @@
+import { onFocus, render, TimeToFirstDraw, useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/solid"
+import { Clipboard } from "@tui/util/clipboard"
+import { createCliRenderer, type CliRendererConfig } from "@opentui/core"
+import { createBtwCommand } from "@tui/command/btw-command"
+import { createMemoryCommands } from "@tui/command/memory-commands"
+import { createClearCommands } from "@tui/command/clear-commands"
+import { createGoalCommand } from "@tui/command/goal-command"
+import { createLoopCommand } from "@tui/command/loop-command"
+import { createWorktreeCommand } from "@tui/command/worktree-command"
+import { createConfigCommand } from "@tui/command/config-command"
+import { createUsageCommand } from "@tui/command/usage-command"
+import { createInsightsCommand } from "@tui/command/insights-command"
+import { createWorkflowCommand } from "@tui/command/workflow-command"
+import { createResearchCommand } from "@tui/command/research-command"
+import { useTerminalTitle } from "@tui/component/terminal-title"
+import { RouteProvider, useRoute } from "@tui/context/route"
+import {
+  Switch,
+  Match,
+  createEffect,
+  createMemo,
+  ErrorBoundary,
+  createSignal,
+  onMount,
+  onCleanup,
+  batch,
+  Show,
+  on,
+} from "solid-js"
+import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
+import { Flag } from "@/flag/flag"
+import { DialogProvider, useDialog, type DialogContext } from "@tui/ui/dialog"
+import { DialogProvider as DialogProviderList } from "@tui/component/dialog-provider"
+import { ErrorComponent } from "@tui/component/error-component"
+import { PluginRouteMissing } from "@tui/component/plugin-route-missing"
+import { ProjectProvider, useProject } from "@tui/context/project"
+import { useEvent } from "@tui/context/event"
+import { SDKProvider, useSDK } from "@tui/context/sdk"
+import { StartupLoading } from "@tui/component/startup-loading"
+import { SyncProvider, useSync } from "@tui/context/sync"
+import { LocalProvider, useLocal } from "@tui/context/local"
+import { DialogModel, useConnected } from "@tui/component/dialog-model"
+import { DialogMcp } from "@tui/component/dialog-mcp"
+import { DialogStatus } from "@tui/component/dialog-status"
+import { DialogThemeList } from "@tui/component/dialog-theme-list"
+import { DialogHelp } from "./ui/dialog-help"
+import { CommandProvider, useCommandDialog } from "@tui/component/dialog-command"
+import { DialogAgent } from "@tui/component/dialog-agent"
+import { DialogSessionList } from "@tui/component/dialog-session-list"
+import { DialogConsoleOrg } from "@tui/component/dialog-console-org"
+import { KeybindProvider, useKeybind } from "@tui/context/keybind"
+import { ThemeProvider, useTheme } from "@tui/context/theme"
+import { Home } from "@tui/routes/home"
+import { Session } from "@tui/routes/session"
+import { PromptHistoryProvider } from "./component/prompt/history"
+import { FrecencyProvider } from "./component/prompt/frecency"
+import { PromptStashProvider } from "./component/prompt/stash"
+import { setupAppEventListeners } from "@tui/effect/app-event-listeners"
+import { setupConsoleCopyHandler, setupCopySelectionHandlers } from "@tui/util/copy-handler"
+import { restoreRenderableFocus } from "./ui/dialog"
+import { ToastProvider, useToast } from "./ui/toast"
+import { ExitProvider, useExit } from "./context/exit"
+import { KVProvider, useKV } from "./context/kv"
+import { Provider } from "@/provider/provider"
+import { ArgsProvider, useArgs, type Args } from "./context/args"
+import open from "open"
+import { PromptRefProvider, usePromptRef } from "./context/prompt"
+import { TuiConfigProvider, useTuiConfig } from "./context/tui-config"
+import { TuiConfig } from "@/config/tui"
+import { createTuiApi, TuiPluginRuntime, type RouteMap } from "./plugin"
+import { EditorContextProvider } from "./context/editor"
+import { WorkflowProvider } from "./context/workflow"
+
+import type { EventSource } from "./context/sdk"
+import { DialogVariant } from "./component/dialog-variant"
+
+function rendererConfig(_config: TuiConfig.Info): CliRendererConfig {
+  const mouseEnabled = !Flag.OPENCODE_DISABLE_MOUSE && (_config.mouse ?? true)
+
+  return {
+    externalOutputMode: "passthrough",
+    targetFps: 60,
+    gatherStats: false,
+    exitOnCtrlC: false,
+    useKittyKeyboard: {},
+    autoFocus: false,
+    openConsoleOnError: false,
+    useMouse: mouseEnabled,
+    consoleOptions: {
+      keyBindings: [{ name: "y", ctrl: true, action: "copy-selection" }],
+      onCopySelection: (text) => {
+        Clipboard.copy(text).catch((error) => {
+          console.error(`Failed to copy console selection to clipboard: ${error}`)
+        })
+      },
+    },
+  }
+}
+
+export function tui(input: {
+  url: string
+  args: Args
+  config: TuiConfig.Info
+  onSnapshot?: () => Promise<string[]>
+  directory?: string
+  fetch?: typeof fetch
+  headers?: RequestInit["headers"]
+  events?: EventSource
+}) {
+  // promise to prevent immediate exit
+  return new Promise<void>(async (resolve) => {
+    const unguard = win32InstallCtrlCGuard()
+    win32DisableProcessedInput()
+
+    const onExit = async () => {
+      unguard?.()
+      resolve()
+    }
+
+    const onBeforeExit = async () => {
+      await TuiPluginRuntime.dispose()
+    }
+
+    const renderer = await createCliRenderer(rendererConfig(input.config))
+    const mode = (await (renderer as any).waitForThemeMode(1000)) ?? "dark"
+
+    await render(() => {
+      return (
+        <ErrorBoundary
+          fallback={(error, reset) => (
+            <ErrorComponent error={error} reset={reset} onBeforeExit={onBeforeExit} onExit={onExit} mode={mode} />
+          )}
+        >
+          <ArgsProvider {...input.args}>
+            <ExitProvider onBeforeExit={onBeforeExit} onExit={onExit}>
+              <KVProvider>
+                <ToastProvider>
+                  <RouteProvider>
+                    <TuiConfigProvider config={input.config}>
+                      <SDKProvider
+                        url={input.url}
+                        directory={input.directory}
+                        fetch={input.fetch}
+                        headers={input.headers}
+                        events={input.events}
+                      >
+                        <ProjectProvider>
+                          <SyncProvider>
+                            <WorkflowProvider>
+                              <ThemeProvider mode={mode}>
+                                <LocalProvider>
+                                  <KeybindProvider>
+                                    <PromptStashProvider>
+                                      <DialogProvider>
+                                        <CommandProvider>
+                                          <FrecencyProvider>
+                                            <PromptHistoryProvider>
+                                              <PromptRefProvider>
+                                                <EditorContextProvider>
+                                                  <App onSnapshot={input.onSnapshot} />
+                                                </EditorContextProvider>
+                                              </PromptRefProvider>
+                                            </PromptHistoryProvider>
+                                          </FrecencyProvider>
+                                        </CommandProvider>
+                                      </DialogProvider>
+                                    </PromptStashProvider>
+                                  </KeybindProvider>
+                                </LocalProvider>
+                              </ThemeProvider>
+                            </WorkflowProvider>
+                          </SyncProvider>
+                        </ProjectProvider>
+                      </SDKProvider>
+                    </TuiConfigProvider>
+                  </RouteProvider>
+                </ToastProvider>
+              </KVProvider>
+            </ExitProvider>
+          </ArgsProvider>
+        </ErrorBoundary>
+      )
+    }, renderer)
+  })
+}
+
+function App(props: { onSnapshot?: () => Promise<string[]> }) {
+  const tuiConfig = useTuiConfig()
+  const route = useRoute()
+  const dimensions = useTerminalDimensions()
+  const renderer = useRenderer()
+  const dialog = useDialog()
+  const local = useLocal()
+  const kv = useKV()
+  const command = useCommandDialog()
+  const keybind = useKeybind()
+  const event = useEvent()
+  const sdk = useSDK()
+  const toast = useToast()
+  const themeState = useTheme()
+  const { theme, mode, setMode, locked, lock, unlock } = themeState
+  const sync = useSync()
+  const exit = useExit()
+  const promptRef = usePromptRef()
+  const routes: RouteMap = new Map()
+  const [routeRev, setRouteRev] = createSignal(0)
+  const routeView = (name: string) => {
+    routeRev()
+    return routes.get(name)?.at(-1)?.render
+  }
+
+  const api = createTuiApi({
+    command,
+    tuiConfig,
+    dialog,
+    keybind,
+    kv,
+    route,
+    routes,
+    bump: () => setRouteRev((x) => x + 1),
+    event,
+    sdk,
+    sync,
+    theme: themeState,
+    toast,
+    renderer,
+  })
+  const [ready, setReady] = createSignal(false)
+  TuiPluginRuntime.init(api)
+    .catch((error) => {
+      console.error("Failed to load TUI plugins", error)
+    })
+    .finally(() => {
+      setReady(true)
+    })
+
+  const copySelection = setupCopySelectionHandlers({ renderer, toast }, useKeyboard)
+  setupConsoleCopyHandler({ renderer, toast })
+  const [terminalTitleEnabled, setTerminalTitleEnabled] = createSignal(kv.get("terminal_title_enabled", true))
+
+  const refreshFocus = () => {
+    queueMicrotask(() => {
+      restoreRenderableFocus(renderer.currentFocusedRenderable)
+    })
+  }
+
+  onFocus(() => {
+    refreshFocus()
+  })
+
+  useTerminalTitle({ terminalTitleEnabled, route, sync, renderer })
+
+  const args = useArgs()
+  onMount(() => {
+    batch(() => {
+      if (args.agent) local.agent.set(args.agent)
+      if (args.model) {
+        const { providerID, modelID } = Provider.parseModel(args.model)
+        if (!providerID || !modelID)
+          return toast.show({
+            variant: "warning",
+            message: `Invalid model format: ${args.model}`,
+            duration: 3000,
+          })
+        local.model.set({ providerID, modelID }, { recent: true })
+      }
+      // Handle --session without --fork immediately (fork is handled in createEffect below)
+      if (args.sessionID && !args.fork) {
+        route.navigate({
+          type: "session",
+          sessionID: args.sessionID,
+        })
+      }
+    })
+  })
+
+  let continued = false
+  createEffect(() => {
+    // When using -c, session list is loaded in blocking phase, so we can navigate at "partial"
+    if (continued || sync.status === "loading" || !args.continue) return
+    const match = sync.data.session
+      .toSorted((a, b) => b.time.updated - a.time.updated)
+      .find((x) => x.parentID === undefined)?.id
+    if (match) {
+      continued = true
+      if (args.fork) {
+        sdk.client.session.fork({ sessionID: match }).then((result) => {
+          if (result.data?.id) {
+            route.navigate({ type: "session", sessionID: result.data.id })
+          } else {
+            toast.show({ message: "Failed to fork session", variant: "error" })
+          }
+        })
+      } else {
+        route.navigate({ type: "session", sessionID: match })
+      }
+    }
+  })
+
+  // Handle --session with --fork: wait for sync to be fully complete before forking
+  // (session list loads in non-blocking phase for --session, so we must wait for "complete"
+  // to avoid a race where reconcile overwrites the newly forked session)
+  let forked = false
+  createEffect(() => {
+    if (forked || sync.status !== "complete" || !args.sessionID || !args.fork) return
+    forked = true
+    sdk.client.session.fork({ sessionID: args.sessionID }).then((result) => {
+      if (result.data?.id) {
+        route.navigate({ type: "session", sessionID: result.data.id })
+      } else {
+        toast.show({ message: "Failed to fork session", variant: "error" })
+      }
+    })
+  })
+
+  createEffect(
+    on(
+      () => sync.status === "complete" && sync.data.provider.length === 0,
+      (isEmpty, wasEmpty) => {
+        // only trigger when we transition into an empty-provider state
+        if (!isEmpty || wasEmpty) return
+        dialog.replace(() => <DialogProviderList />)
+      },
+    ),
+  )
+
+  const connected = useConnected()
+  command.register(() => [
+    {
+      title: "Switch session",
+      value: "session.list",
+      keybind: "session_list",
+      category: "Session",
+      suggested: sync.data.session.length > 0,
+      slash: {
+        name: "sessions",
+        aliases: ["resume", "continue"],
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogSessionList />)
+      },
+    },
+    {
+      title: "New session",
+      suggested: route.data.type === "session",
+      value: "session.new",
+      keybind: "session_new",
+      category: "Session",
+      slash: {
+        name: "new",
+      },
+      onSelect: () => {
+        route.navigate({
+          type: "home",
+        })
+        dialog.clear()
+      },
+    },
+    ...createClearCommands({ sdk, sync, kv, toast, route }),
+    ...Array.from({ length: 9 }, (_, i) => ({
+      title: `Switch to session in quick slot ${i + 1}`,
+      value: `session.quick_switch.${i + 1}`,
+      keybind: `session_quick_switch_${i + 1}`,
+      category: "Session",
+      hidden: true,
+      onSelect: () => {
+        local.session.quickSwitch(i + 1)
+      },
+    })),
+    {
+      title: "Switch model",
+      value: "model.list",
+      keybind: "model_list",
+      suggested: true,
+      category: "Agent",
+      slash: {
+        name: "models",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogModel />)
+      },
+    },
+    {
+      title: "Model cycle",
+      value: "model.cycle_recent",
+      keybind: "model_cycle_recent",
+      category: "Agent",
+      hidden: true,
+      onSelect: () => {
+        local.model.cycle(1)
+      },
+    },
+    {
+      title: "Model cycle reverse",
+      value: "model.cycle_recent_reverse",
+      keybind: "model_cycle_recent_reverse",
+      category: "Agent",
+      hidden: true,
+      onSelect: () => {
+        local.model.cycle(-1)
+      },
+    },
+    {
+      title: "Favorite cycle",
+      value: "model.cycle_favorite",
+      keybind: "model_cycle_favorite",
+      category: "Agent",
+      hidden: true,
+      onSelect: () => {
+        local.model.cycleFavorite(1)
+      },
+    },
+    {
+      title: "Favorite cycle reverse",
+      value: "model.cycle_favorite_reverse",
+      keybind: "model_cycle_favorite_reverse",
+      category: "Agent",
+      hidden: true,
+      onSelect: () => {
+        local.model.cycleFavorite(-1)
+      },
+    },
+    {
+      title: "Switch agent",
+      value: "agent.list",
+      keybind: "agent_list",
+      category: "Agent",
+      slash: {
+        name: "agents",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogAgent />)
+      },
+    },
+    {
+      title: "Toggle MCPs",
+      value: "mcp.list",
+      category: "Agent",
+      slash: {
+        name: "mcps",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogMcp />)
+      },
+    },
+    {
+      title: "Agent cycle",
+      value: "agent.cycle",
+      keybind: "agent_cycle",
+      category: "Agent",
+      hidden: true,
+      onSelect: () => {
+        local.agent.move(1)
+      },
+    },
+    {
+      title: "Variant cycle",
+      value: "variant.cycle",
+      keybind: "variant_cycle",
+      category: "Agent",
+      onSelect: () => {
+        local.model.variant.cycle()
+      },
+    },
+    {
+      title: "Switch model variant",
+      value: "variant.list",
+      keybind: "variant_list",
+      category: "Agent",
+      hidden: local.model.variant.list().length === 0,
+      slash: {
+        name: "variants",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogVariant />)
+      },
+    },
+    {
+      title: "Agent cycle reverse",
+      value: "agent.cycle.reverse",
+      keybind: "agent_cycle_reverse",
+      category: "Agent",
+      hidden: true,
+      onSelect: () => {
+        local.agent.move(-1)
+      },
+    },
+    {
+      title: "Connect provider",
+      value: "provider.connect",
+      suggested: !connected(),
+      slash: {
+        name: "connect",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogProviderList />)
+      },
+      category: "Provider",
+    },
+    ...(sync.data.console_state.switchableOrgCount > 1
+      ? [
+          {
+            title: "Switch org",
+            value: "console.org.switch",
+            suggested: Boolean(sync.data.console_state.activeOrgName),
+            slash: {
+              name: "org",
+              aliases: ["orgs", "switch-org"],
+            },
+            onSelect: () => {
+              dialog.replace(() => <DialogConsoleOrg />)
+            },
+            category: "Provider",
+          },
+        ]
+      : []),
+    {
+      title: "View status",
+      keybind: "status_view",
+      value: "opencode.status",
+      slash: {
+        name: "status",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogStatus />)
+      },
+      category: "System",
+    },
+    {
+      title: "Switch theme",
+      value: "theme.switch",
+      keybind: "theme_list",
+      slash: {
+        name: "themes",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogThemeList />)
+      },
+      category: "System",
+    },
+    {
+      title: "Toggle theme mode",
+      value: "theme.switch_mode",
+      onSelect: (dialog: DialogContext) => {
+        setMode(mode() === "dark" ? "light" : "dark")
+        dialog.clear()
+      },
+      category: "System",
+    },
+    {
+      title: locked() ? "Unlock theme mode" : "Lock theme mode",
+      value: "theme.mode.lock",
+      onSelect: (dialog: DialogContext) => {
+        if (locked()) unlock()
+        else lock()
+        dialog.clear()
+      },
+      category: "System",
+    },
+    {
+      title: "Help",
+      value: "help.show",
+      slash: {
+        name: "help",
+      },
+      onSelect: () => {
+        dialog.replace(() => <DialogHelp />)
+      },
+      category: "System",
+    },
+    createBtwCommand({ dialog, local, toast, sync, sdk, route }),
+    ...createMemoryCommands({ dialog, toast, sdk: { url: sdk.url, fetch: sdk.fetch }, route }),
+    {
+      title: "Open docs",
+      value: "docs.open",
+      onSelect: () => {
+        open("https://opencode.ai/docs").catch(() => {})
+        dialog.clear()
+      },
+      category: "System",
+    },
+    createGoalCommand({ dialog, sdk, toast, route }),
+    createLoopCommand({ dialog, toast, sdk: { url: sdk.url, fetch: sdk.fetch }, route }),
+    createWorktreeCommand({ dialog, sdk, toast }),
+    createConfigCommand({ sdk: { url: sdk.url, fetch: sdk.fetch }, toast, dialog }),
+    createUsageCommand({ sdk: { url: sdk.url, fetch: sdk.fetch }, toast, dialog, route }),
+    createInsightsCommand({ sdk: { url: sdk.url, fetch: sdk.fetch }, toast, dialog }),
+    createWorkflowCommand({ dialog, toast, sdk: { url: sdk.url, fetch: sdk.fetch }, route }),
+    ...((sync.data.config.experimental as any)?.deep_research === true
+      ? [createResearchCommand({ dialog, toast, sdk, route })]
+      : []),
+    {
+      title: "Exit the app",
+      value: "app.exit",
+      slash: {
+        name: "exit",
+        aliases: ["quit", "q"],
+      },
+      onSelect: () => exit(),
+      category: "System",
+    },
+    {
+      title: "Toggle debug panel",
+      category: "System",
+      value: "app.debug",
+      onSelect: (dialog: DialogContext) => {
+        renderer.toggleDebugOverlay()
+        dialog.clear()
+      },
+    },
+    {
+      title: "Toggle console",
+      category: "System",
+      value: "app.console",
+      onSelect: (dialog: DialogContext) => {
+        renderer.console.toggle()
+        dialog.clear()
+      },
+    },
+    {
+      title: "Write heap snapshot",
+      category: "System",
+      value: "app.heap_snapshot",
+      onSelect: async (dialog: DialogContext) => {
+        const files = await props.onSnapshot?.()
+        toast.show({
+          variant: "info",
+          message: `Heap snapshot written to ${files?.join(", ")}`,
+          duration: 5000,
+        })
+        dialog.clear()
+      },
+    },
+    {
+      title: "Search transcript",
+      value: "session.search",
+      keybind: "session_search",
+      category: "Session",
+      hidden: true,
+      onSelect: () => {
+        // handled locally via keybind in session route
+      },
+    },
+    {
+      title: "Suspend terminal",
+      value: "terminal.suspend",
+      keybind: "terminal_suspend",
+      category: "System",
+      hidden: true,
+      enabled: tuiConfig.keybinds?.terminal_suspend !== "none",
+      onSelect: () => {
+        process.once("SIGCONT", () => {
+          renderer.resume()
+          refreshFocus()
+        })
+
+        renderer.suspend()
+        // pid=0 means send the signal to all processes in the process group
+        process.kill(0, "SIGTSTP")
+      },
+    },
+    {
+      title: terminalTitleEnabled() ? "Disable terminal title" : "Enable terminal title",
+      value: "terminal.title.toggle",
+      keybind: "terminal_title_toggle",
+      category: "System",
+      onSelect: (dialog: DialogContext) => {
+        setTerminalTitleEnabled((prev) => {
+          const next = !prev
+          kv.set("terminal_title_enabled", next)
+          if (!next) renderer.setTerminalTitle("")
+          return next
+        })
+        dialog.clear()
+      },
+    },
+    {
+      title: kv.get("animations_enabled", true) ? "Disable animations" : "Enable animations",
+      value: "app.toggle.animations",
+      category: "System",
+      onSelect: (dialog: DialogContext) => {
+        kv.set("animations_enabled", !kv.get("animations_enabled", true))
+        dialog.clear()
+      },
+    },
+    {
+      title: kv.get("file_context_enabled", true) ? "Disable file context" : "Enable file context",
+      value: "app.toggle.file_context",
+      category: "System",
+      onSelect: (dialog) => {
+        kv.set("file_context_enabled", !kv.get("file_context_enabled", true))
+        dialog.clear()
+      },
+    },
+    {
+      title: kv.get("diff_wrap_mode", "word") === "word" ? "Disable diff wrapping" : "Enable diff wrapping",
+      value: "app.toggle.diffwrap",
+      category: "System",
+      onSelect: (dialog: DialogContext) => {
+        const current = kv.get("diff_wrap_mode", "word")
+        kv.set("diff_wrap_mode", current === "word" ? "none" : "word")
+        dialog.clear()
+      },
+    },
+  ])
+
+  const off = setupAppEventListeners({ sdk: { event, client: sdk.client }, route, command, toast, dialog, kv, exit })
+  onCleanup(() => off.forEach((fn) => fn()))
+
+  const plugin = createMemo(() => {
+    if (!ready()) return
+    if (route.data.type !== "plugin") return
+    const render = routeView(route.data.id)
+    if (!render) return <PluginRouteMissing id={route.data.id} onHome={() => route.navigate({ type: "home" })} />
+    return render({ params: route.data.data })
+  })
+
+  return (
+    <box
+      width={dimensions().width}
+      height={dimensions().height}
+      backgroundColor={theme.background}
+      onMouseDown={copySelection.onMouseDown}
+      onMouseUp={copySelection.onMouseUp}
+    >
+      <Show when={Flag.OPENCODE_SHOW_TTFD}>
+        <TimeToFirstDraw />
+      </Show>
+      <Show when={ready()}>
+        <Switch>
+          <Match when={route.data.type === "home"}>
+            <Home />
+          </Match>
+          <Match when={route.data.type === "session"}>
+            <Session />
+          </Match>
+        </Switch>
+      </Show>
+      {plugin()}
+      <TuiPluginRuntime.Slot name="app" />
+      <StartupLoading ready={ready} />
+    </box>
+  )
+}

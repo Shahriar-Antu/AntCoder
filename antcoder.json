@@ -1,0 +1,45 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "local-llama": {
+      "name": "Local Llama",
+      "npm": "local-llama",
+      "models": {
+        "qwen2.5-coder-3b": {
+          "name": "Qwen2.5-Coder-3B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 8192
+          }
+        },
+        "qwen2.5-coder-1.5b": {
+          "name": "Qwen2.5-Coder-1.5B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": true,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 8192
+          }
+        },
+        "qwen2.5-coder-0.5b": {
+          "name": "Qwen2.5-Coder-0.5B",
+          "attachment": false,
+          "reasoning": false,
+          "toolcall": false,
+          "input": ["text"],
+          "context": {
+            "limit": 32768,
+            "limit_output": 4096
+          }
+        }
+      }
+    }
+  },
+  "model": "local-llama/qwen2.5-coder-3b"
+}
