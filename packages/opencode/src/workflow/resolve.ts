@@ -23,7 +23,7 @@ export namespace WorkflowResolve {
     // 1. Walk up from project dir
     let current = path.resolve(dir)
     while (true) {
-      const file = path.join(current, ".opencode", "workflows", `${name}.js`)
+      const file = path.join(current, ".antcoder", "workflows", `${name}.js`)
       if (existsSync(file)) return read(file)
 
       const parent = path.dirname(current)
@@ -31,7 +31,7 @@ export namespace WorkflowResolve {
       current = parent
     }
 
-    // 2. Fallback: global config dir (~/.config/opencode/workflows/)
+    // 2. Fallback: global config dir (~/.config/antcoder/workflows/)
     const global = path.join(Global.Path.config, "workflows", `${name}.js`)
     if (existsSync(global)) return read(global)
 

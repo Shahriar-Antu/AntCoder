@@ -383,10 +383,10 @@ export const McpLogoutCommand = cmd({
 
 async function resolveConfigPath(baseDir: string, global = false) {
   // Check for existing config files (prefer .jsonc over .json, check .opencode/ subdirectory too)
-  const candidates = [path.join(baseDir, "opencode.json"), path.join(baseDir, "opencode.jsonc")]
+  const candidates = [path.join(baseDir, "antcoder.json"), path.join(baseDir, "antcoder.jsonc")]
 
   if (!global) {
-    candidates.push(path.join(baseDir, ".opencode", "opencode.json"), path.join(baseDir, ".opencode", "opencode.jsonc"))
+    candidates.push(path.join(baseDir, ".antcoder", "antcoder.json"), path.join(baseDir, ".antcoder", "antcoder.jsonc"))
   }
 
   for (const candidate of candidates) {
@@ -395,7 +395,7 @@ async function resolveConfigPath(baseDir: string, global = false) {
     }
   }
 
-  // Default to opencode.json if none exist
+  // Default to antcoder.json if none exist
   return candidates[0]
 }
 

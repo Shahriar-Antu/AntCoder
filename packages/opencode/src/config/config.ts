@@ -227,7 +227,7 @@ export namespace Config {
       })
       if (!md) continue
 
-      const patterns = ["/.opencode/command/", "/.opencode/commands/", "/command/", "/commands/"]
+      const patterns = ["/.antcoder/command/", "/.antcoder/commands/", "/command/", "/commands/"]
       const file = rel(item, patterns) ?? path.basename(item)
       const name = trim(file)
 
@@ -266,7 +266,7 @@ export namespace Config {
       })
       if (!md) continue
 
-      const patterns = ["/.opencode/agent/", "/.opencode/agents/", "/agent/", "/agents/"]
+      const patterns = ["/.antcoder/agent/", "/.antcoder/agents/", "/agent/", "/agents/"]
       const file = rel(item, patterns) ?? path.basename(item)
       const agentName = trim(file)
 
@@ -1855,8 +1855,8 @@ export namespace Config {
 
   export class Service extends ServiceMap.Service<Service, Interface>()("@opencode/Config") {}
 
-  function globalConfigFile() {
-    const candidates = ["opencode.jsonc", "opencode.json", "config.json"].map((file) =>
+function globalConfigFile() {
+    const candidates = ["antcoder.jsonc", "antcoder.json", "config.json"].map((file) =>
       path.join(Global.Path.config, file),
     )
     for (const file of candidates) {
@@ -2009,8 +2009,8 @@ export namespace Config {
         const loadGlobal = Effect.fnUntraced(function* () {
           let result: Info = {}
           result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "config.json")))
-          result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "opencode.json")))
-          result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "opencode.jsonc")))
+          result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "antcoder.json")))
+          result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "antcoder.jsonc")))
 
           const legacy = path.join(Global.Path.config, "config")
           if (existsSync(legacy)) {
@@ -2126,8 +2126,8 @@ export namespace Config {
           const deps: Promise<void>[] = []
 
           for (const dir of unique(directories)) {
-            if (dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR) {
-              for (const file of ["opencode.json", "opencode.jsonc"]) {
+            if (dir.endsWith(".antcoder") || dir === Flag.OPENCODE_CONFIG_DIR) {
+              for (const file of ["antcoder.json", "antcoder.jsonc"]) {
                 const source = path.join(dir, file)
                 log.debug(`loading config from ${source}`)
                 merge(source, yield* loadFile(source))
@@ -2242,7 +2242,7 @@ export namespace Config {
           }
 
           if (existsSync(managedDir)) {
-            for (const file of ["opencode.json", "opencode.jsonc"]) {
+            for (const file of ["antcoder.json", "antcoder.jsonc"]) {
               const source = path.join(managedDir, file)
               merge(source, yield* loadFile(source), "global")
             }

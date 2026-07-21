@@ -36,14 +36,14 @@ export namespace LoopParser {
 
     // Project-level loop.md
     if (input?.projectDir) {
-      const projectPath = path.join(input.projectDir, ".opencode", "loop.md")
+      const projectPath = path.join(input.projectDir, ".antcoder", "loop.md")
       const projectFile = Bun.file(projectPath)
       if (await projectFile.exists()) return (await projectFile.text()).trim() || undefined
     }
 
     // Global loop.md
     const home = process.env.HOME ?? process.env.USERPROFILE ?? ""
-    const globalPath = path.join(home, ".config", "opencode", "loop.md")
+    const globalPath = path.join(home, ".config", "antcoder", "loop.md")
     const globalFile = Bun.file(globalPath)
     if (await globalFile.exists()) return (await globalFile.text()).trim() || undefined
 

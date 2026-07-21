@@ -128,14 +128,14 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket, app: Hono = new Hono()
       const { name, prompt } = c.req.valid("json")
       if (!/^[a-zA-Z0-9_-]+$/.test(name)) return c.json({ error: "Invalid name" }, 400)
       const script = await WorkflowGenerate.generate(name, prompt)
-      const dir = path.join(Instance.directory, ".opencode", "workflows")
+      const dir = path.join(Instance.directory, ".antcoder", "workflows")
       await fs.mkdir(dir, { recursive: true })
       await fs.writeFile(path.join(dir, `${name}.js`), script)
       return c.json({ path: path.join(dir, `${name}.js`) })
     })
     .get("/workflow/scripts", async (c) => {
       const scripts: string[] = []
-      const dirs = [path.join(Instance.directory, ".opencode", "workflows"), path.join(Global.Path.config, "workflows")]
+      const dirs = [path.join(Instance.directory, ".antcoder", "workflows"), path.join(Global.Path.config, "workflows")]
       for (const dir of dirs) {
         try {
           const entries = await fs.readdir(dir)
