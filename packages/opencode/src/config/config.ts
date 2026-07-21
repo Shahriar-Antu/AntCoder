@@ -2107,7 +2107,7 @@ function globalConfigFile() {
 
           if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
             for (const file of yield* Effect.promise(() =>
-              ConfigPaths.projectFiles("opencode", ctx.directory, ctx.worktree),
+              ConfigPaths.projectFiles("antcoder", ctx.directory, ctx.worktree),
             )) {
               merge(file, yield* loadFile(file), "local")
             }
